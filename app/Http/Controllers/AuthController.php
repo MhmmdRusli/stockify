@@ -25,7 +25,11 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('/admin/opnames'); // Arahkan ke halaman utama kamu
+            
+            // GANTI UTK MEMAKSA LOGOUT DARI JEBAKAN 403:
+            // Dari: return redirect()->intended('/dashboard');
+            // Menjadi:
+            return redirect()->to('/dashboard'); 
         }
 
         return back()->withErrors([

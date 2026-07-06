@@ -12,6 +12,7 @@
         </a>
     </li>
 
+    @if(Auth::check() && (Auth::user()->role === 'Admin' || Auth::user()->role === 'Manajer Gudang'))
     <li>
         <a href="{{ route('products.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*products*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
             <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -20,7 +21,9 @@
             <span class="ml-3">Data Produk</span>
         </a>
     </li>
+    @endif
 
+    @if(Auth::check() && Auth::user()->role === 'Admin')
     <li>
         <a href="{{ route('suppliers.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*suppliers*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
             <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +33,9 @@
             <span class="ml-3">Data Supplier</span>
         </a>
     </li>
+    @endif
 
+    @if(Auth::check() && Auth::user()->role === 'Admin')
     <li>
         <a href="{{ route('categories.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*categories*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
             <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -39,7 +44,9 @@
             <span class="ml-3">Data Kategori</span>
         </a>
     </li>
+    @endif
 
+    @if(Auth::check() && Auth::user()->role === 'Manajer Gudang')
     <li>
         <a href="{{ route('opnames.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*opnames*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
             <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -48,6 +55,41 @@
             </svg>
             <span class="ml-3">Stock Opname</span>
         </a>
+    </li>
+    @endif
+
+    @if(Auth::check() && (Auth::user()->role === 'Manajer Gudang' || Auth::user()->role === 'Staff Gudang'))
+    <li>
+        <a href="{{ route('barang.masuk.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*barang-masuk*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+            <svg class="w-6 h-6 text-green-500 transition duration-75 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span class="ml-3">Barang Masuk</span>
+        </a>
+    </li>
+    @endif
+
+    @if(Auth::check() && (Auth::user()->role === 'Manajer Gudang' || Auth::user()->role === 'Staff Gudang'))
+    <li>
+        <a href="{{ route('barang.keluar.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*barang-keluar*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+            <svg class="w-6 h-6 text-red-500 transition duration-75 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 8l4 4m0 0l-4 4m4-4H3m5 4v1a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3h-4a3 3 0 00-3 3v1"></path>
+            </svg>
+            <span class="ml-3">Barang Keluar</span>
+        </a>
+    </li>
+    @endif
+
+    <li class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="w-full flex items-center p-2 text-base text-red-600 rounded-lg hover:bg-red-50 group dark:text-red-400 dark:hover:bg-gray-700">
+                <svg class="w-6 h-6 text-red-500 transition duration-75 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span class="ml-3">Keluar / Logout</span>
+            </button>
+        </form>
     </li>
 
 </ul>
