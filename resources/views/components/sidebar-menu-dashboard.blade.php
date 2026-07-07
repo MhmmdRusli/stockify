@@ -1,93 +1,131 @@
 @props(['icon' => null, 'routeName' => null, 'title' => null])
 
-<ul class="pb-2 space-y-2">
-    
+<ul class="space-y-1 py-4">
+
+    {{-- 📊 DASHBOARD (Semua Bisa Lihat) --}}
     <li>
-        <a href="/dashboard" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('dashboard*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-            </svg>
-            <span class="ml-3">Dashboard</span>
+        <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('dashboard*') || Request::is('/') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('dashboard*') || Request::is('/') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">grid_view</span>
+            <span class="text-sm">Dashboard</span>
         </a>
     </li>
 
-    @if(Auth::check() && (Auth::user()->role === 'Admin' || Auth::user()->role === 'Manajer Gudang'))
+    {{-- 📦 DATA PRODUK (Admin, Manajer, & Staff Bisa Lihat) --}}
+    @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Manajer Gudang', 'Staff Gudang']))
     <li>
-        <a href="{{ route('products.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*products*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
-            </svg>
-            <span class="ml-3">Data Produk</span>
+        <a href="{{ route('products.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('products*') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('products*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">warehouse</span>
+            <span class="text-sm">Data Produk</span>
         </a>
     </li>
     @endif
 
+    {{-- 🏢 DATA SUPPLIER (Admin & Manajer Gudang Bisa Melihat) --}}
+    @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Manajer Gudang']))
+    <li>
+        <a href="{{ route('suppliers.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('suppliers*') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('suppliers*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">corporate_fare</span>
+            <span class="text-sm">Data Supplier</span>
+        </a>
+    </li>
+    @endif
+
+    {{-- 🛠️ DATA KATEGORI (Khusus Admin Master) --}}
     @if(Auth::check() && Auth::user()->role === 'Admin')
     <li>
-        <a href="{{ route('suppliers.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*suppliers*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-            </svg>
-            <span class="ml-3">Data Supplier</span>
+        <a href="{{ route('categories.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('categories*') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('categories*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">category</span>
+            <span class="text-sm">Data Kategori</span>
         </a>
     </li>
-    @endif
-
-    @if(Auth::check() && Auth::user()->role === 'Admin')
+    {{-- 👥 MANAJEMEN USER (Khusus Admin Master) --}}
     <li>
-        <a href="{{ route('categories.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*categories*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-            </svg>
-            <span class="ml-3">Data Kategori</span>
+        <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('users*') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('users*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">manage_accounts</span>
+            <span class="text-sm">Manajemen User</span>
         </a>
     </li>
     @endif
 
+    {{-- 📋 STOCK OPNAME (Hanya dipegang oleh Manajer Gudang) --}}
     @if(Auth::check() && Auth::user()->role === 'Manajer Gudang')
     <li>
-        <a href="{{ route('opnames.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*opnames*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9 4a1 1 0 10-2 0v2H9a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V9z" clip-rule="evenodd"></path>
-            </svg>
-            <span class="ml-3">Stock Opname</span>
+        <a href="{{ route('opnames.index') }}" class="flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-300 {{ Request::is('opnames*') ? 'bg-amber-50 text-gray-900 font-semibold shadow-sm border-l-4 border-amber-400 dark:bg-amber-900/15 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 group' }}">
+            <span class="material-symbols-outlined transition-colors {{ Request::is('opnames*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">assignment</span>
+            <span class="text-sm">Stock Opname</span>
         </a>
     </li>
     @endif
 
-    @if(Auth::check() && (Auth::user()->role === 'Manajer Gudang' || Auth::user()->role === 'Staff Gudang'))
+    {{-- 📥 DROPDOWN BARANG MASUK & KELUAR (Admin, Manajer, & Staff) --}}
+    @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Manajer Gudang', 'Staff Gudang']))
     <li>
-        <a href="{{ route('barang.masuk.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*barang-masuk*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-green-500 transition duration-75 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-            <span class="ml-3">Barang Masuk</span>
-        </a>
+        <button type="button" class="flex items-center justify-between w-full px-4 py-3 mx-2 w-[calc(100%-16px)] rounded-lg transition-all duration-300 group {{ Request::is('barang-masuk*') || Request::is('barang-keluar*') ? 'bg-gray-50 text-amber-600 font-semibold dark:bg-gray-800 dark:text-amber-400' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}" data-collapse-toggle="dropdown-barang">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-gray-400 group-hover:text-amber-500 dark:text-gray-500">swap_horiz</span>
+                <span class="text-sm">Barang Masuk & Keluar</span>
+            </div>
+            <span class="material-symbols-outlined text-sm transition-transform duration-200 {{ Request::is('barang-masuk*') || Request::is('barang-keluar*') ? 'rotate-180' : '' }}">keyboard_arrow_down</span>
+        </button>
+        <ul id="dropdown-barang" class="{{ Request::is('barang-masuk*') || Request::is('barang-keluar*') ? '' : 'hidden' }} mt-1 space-y-1 pl-4 pr-2">
+            <li>
+                <a href="{{ route('barang.masuk.index') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ Request::is('barang-masuk*') ? 'bg-teal-50 text-teal-700 font-semibold shadow-sm dark:bg-teal-900/20 dark:text-teal-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    <span class="material-symbols-outlined text-sm {{ Request::is('barang-masuk*') ? 'text-teal-600 dark:text-teal-400' : 'text-teal-500' }}">input</span>
+                    <span class="text-sm">Barang Masuk</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('barang.keluar.index') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ Request::is('barang-keluar*') ? 'bg-rose-50 text-rose-700 font-semibold shadow-sm dark:bg-rose-900/20 dark:text-rose-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    <span class="material-symbols-outlined text-sm {{ Request::is('barang-keluar*') ? 'text-rose-600 dark:text-rose-400' : 'text-rose-500' }}">output</span>
+                    <span class="text-sm">Barang Keluar</span>
+                </a>
+            </li>
+        </ul>
     </li>
     @endif
 
-    @if(Auth::check() && (Auth::user()->role === 'Manajer Gudang' || Auth::user()->role === 'Staff Gudang'))
+    {{-- 📊 MENU DROPDOWN LAPORAN (Admin & Manajer Gudang) --}}
+    @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Manajer Gudang']))
     <li>
-        <a href="{{ route('barang.keluar.index') }}" class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700 {{ Request::is('*barang-keluar*') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
-            <svg class="w-6 h-6 text-red-500 transition duration-75 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 8l4 4m0 0l-4 4m4-4H3m5 4v1a3 3 0 003 3h4a3 3 0 003-3V7a3 3 0 00-3-3h-4a3 3 0 00-3 3v1"></path>
-            </svg>
-            <span class="ml-3">Barang Keluar</span>
-        </a>
+        <button type="button" class="flex items-center justify-between w-full px-4 py-3 mx-2 w-[calc(100%-16px)] rounded-lg transition-all duration-300 group {{ Request::is('report*') ? 'bg-gray-50 text-amber-600 font-semibold dark:bg-gray-800 dark:text-amber-400' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}" data-collapse-toggle="dropdown-laporan">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-gray-400 group-hover:text-amber-500 dark:text-gray-500">analytics</span>
+                <span class="text-sm">Laporan</span>
+            </div>
+            <span class="material-symbols-outlined text-sm transition-transform duration-200 {{ Request::is('report*') ? 'rotate-180' : '' }}">keyboard_arrow_down</span>
+        </button>
+        <ul id="dropdown-laporan" class="{{ Request::is('report*') ? '' : 'hidden' }} mt-1 space-y-1 pl-4 pr-2">
+            <li>
+                <a href="{{ route('report.stock') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ Request::is('report/stock') ? 'bg-amber-50 text-amber-700 font-semibold shadow-sm dark:bg-amber-900/20 dark:text-amber-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    <span class="material-symbols-outlined text-sm {{ Request::is('report/stock') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400' }}">inventory</span>
+                    <span class="text-sm">Laporan Stok Barang</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('report.transaction') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ Request::is('report/transactions') ? 'bg-amber-50 text-amber-700 font-semibold shadow-sm dark:bg-amber-900/20 dark:text-amber-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    <span class="material-symbols-outlined text-sm {{ Request::is('report/transactions') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400' }}">sync_alt</span>
+                    <span class="text-sm">Barang Masuk & Keluar</span>
+                </a>
+            </li>
+            @if(Auth::user()->role === 'Admin')
+            <li>
+                <a href="{{ route('report.user_activity') }}" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ Request::is('report/users-activity') ? 'bg-amber-50 text-amber-700 font-semibold shadow-sm dark:bg-amber-900/20 dark:text-amber-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                    <span class="material-symbols-outlined text-sm {{ Request::is('report/users-activity') ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400' }}">person_search</span>
+                    <span class="text-sm">Aktivitas Pengguna</span>
+                </a>
+            </li>
+            @endif
+        </ul>
     </li>
     @endif
 
+    {{-- 🚪 LOGOUT SEKSI --}}
     <li class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="w-full flex items-center p-2 text-base text-red-600 rounded-lg hover:bg-red-50 group dark:text-red-400 dark:hover:bg-gray-700">
-                <svg class="w-6 h-6 text-red-500 transition duration-75 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                <span class="ml-3">Keluar / Logout</span>
+            <button type="submit" class="w-[calc(100%-16px)] flex items-center gap-3 px-4 py-3 mx-2 text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/15 rounded-lg transition-all duration-300 text-sm text-left">
+                <span class="material-symbols-outlined text-rose-500">logout</span>
+                <span>Keluar / Logout</span>
             </button>
         </form>
     </li>

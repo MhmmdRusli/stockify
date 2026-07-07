@@ -7,6 +7,12 @@ use App\Models\Product;
 use App\Models\StockTransaction;
 use Illuminate\Http\Request;
 
+// 🟢 KOREKSI: WAJIB DI-IMPORT AGAR FITUR EXCEL & PDF TIDAK ERROR
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
+
 class StockTransactionController extends Controller
 {
     protected $transactionService;
@@ -21,7 +27,6 @@ class StockTransactionController extends Controller
     // ==========================================
     public function masukIndex()
     {
-        // Menggunakan tipe 'in' sesuai database kamu
         $transactions = StockTransaction::where('type', 'in')->with('product')->latest()->get();
         $products = Product::all(); 
 
@@ -39,7 +44,7 @@ class StockTransactionController extends Controller
         $validated['type'] = 'in';
         $validated['date'] = now()->toDateString();
         $validated['user_id'] = auth()->id() ?? 1; 
-        $validated['status'] = 'Pending'; // SOP: Wajib Pending di awal
+        $validated['status'] = 'Pending'; 
 
         StockTransaction::create($validated);
 
@@ -51,7 +56,6 @@ class StockTransactionController extends Controller
     // ==========================================
     public function keluarIndex()
     {
-        // Menggunakan tipe 'out' sesuai database kamu
         $transactions = StockTransaction::where('type', 'out')->with('product')->latest()->get();
         $products = Product::all(); 
 
@@ -66,9 +70,8 @@ class StockTransactionController extends Controller
             'notes'      => 'nullable|string',
         ]);
 
-        // Opsional: Validasi tambahan sebelum diajukan (Biar Manajer tidak asal input kalau stok kosong)
         $product = Product::findOrFail($request->product_id);
-        if ($product->stock < $request->quantity) {
+        if ($product->minimum_stock < $request->quantity) {
             return redirect()->back()->with('error', 'Gagal mengajukan! Stok di gudang tidak mencukupi.');
         }
 
@@ -83,7 +86,7 @@ class StockTransactionController extends Controller
     }
 
     // ==========================================
-    // ⚡ TOMBOL SOP: KONFIRMASI & TOLAK (Prosedur Staff)
+    // ⚡ TOMBOL SOP: KONFIRMASI & TOLAK
     // ==========================================
     public function konfirmasi($id)
     {
@@ -95,15 +98,14 @@ class StockTransactionController extends Controller
 
         $product = Product::findOrFail($transaction->product_id);
 
-        // Eksekusi perubahan stok berdasarkan tipe transaksi
         if ($transaction->type === 'in') {
-            $product->increment('stock', $transaction->quantity);
+            $product->increment('minimum_stock', $transaction->quantity);
             $transaction->update(['status' => 'Diterima']);
         } else if ($transaction->type === 'out') {
-            if ($product->stock < $transaction->quantity) {
+            if ($product->minimum_stock < $transaction->quantity) {
                 return redirect()->back()->with('error', 'Gagal konfirmasi! Stok aktual di gudang tidak cukup.');
             }
-            $product->decrement('stock', $transaction->quantity);
+            $product->decrement('minimum_stock', $transaction->quantity);
             $transaction->update(['status' => 'Dikeluarkan']);
         }
 
@@ -118,7 +120,6 @@ class StockTransactionController extends Controller
             return redirect()->back()->with('error', 'Transaksi ini sudah diproses sebelumnya!');
         }
 
-        // Cukup ubah status menjadi Ditolak tanpa memanipulasi stok produk
         $transaction->update(['status' => 'Ditolak']);
 
         return redirect()->back()->with('success', 'Transaksi telah ditolak! Stok produk tidak berubah.');
@@ -128,5 +129,62 @@ class StockTransactionController extends Controller
     {
         $transactions = $this->transactionService->getAllTransactions();
         return view('admin.transactions.print', compact('transactions'));
+    }
+
+    // ==========================================
+    // 📊 FITUR LAPORAN
+    // ==========================================
+    public function stockReport()
+    {
+        $products = Product::with('category')->get();
+        return view('report.stock', compact('products'));
+    }
+
+    public function transactionReport()
+    {
+        $transactions = StockTransaction::with(['product', 'user'])->latest()->get();
+        return view('report.transaction', compact('transactions'));
+    }
+
+    public function userActivityReport()
+    {
+        $activities = StockTransaction::with(['user', 'product'])->latest()->get();
+        return view('report.user_activity', compact('activities'));
+    }
+
+    // ==========================================
+    // 🟢 EXPORT EXCEL
+    // ==========================================
+    public function exportExcel()
+    {
+        return Excel::download(new ProductsExport, 'laporan_stok_'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    // ==========================================
+    // 🔴 EXPORT PDF
+    // ==========================================
+    public function exportPdf()
+    {
+        $products = Product::with('category')->get();
+        $pdf = Pdf::loadView('report.stock_pdf', compact('products'));
+        return $pdf->download('laporan_stok_'.now()->format('Y-m-d').'.pdf');
+    }
+
+    // ==========================================
+    // 🔵 IMPORT EXCEL
+    // ==========================================
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            // 🟢 KOREKSI OPTIMASI: Ditambahkan ekstensi agar pembacaan file .xlsx lebih toleran di beberapa operating system
+            'file' => 'required|file|mimes:xlsx,xls,csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:2048'
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('file'));
+            return redirect()->back()->with('success', 'Data produk berhasil di-import massal!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengimpor data! Periksa kembali format kolom berkas Anda.');
+        }
     }
 }

@@ -10,6 +10,9 @@
     <title>Dashboard - </title>
     @vite(['resources/css/app.css','resources/js/app.js'])
     <link rel="canonical" href="{{ request()->fullUrl() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
     @if(isset($page->params['robots']))
         <meta name="robots" content="{{ $page->params['robots'] }}">
@@ -18,6 +21,60 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    {{-- ➕ TAMBAHAN: Google Material Symbols Outlined --}}
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    {{-- ➕ TAMBAHAN: Style CSS Pendukung Warna & Ikon (Sesuai Desain InventoryFlow) --}}
+    <style>
+        .material-symbols-outlined {
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --secondary: #10b981;
+            --secondary-container: #d2f8e9;
+            --on-secondary-container: #047857;
+            --on-surface-variant: #4b5563;
+            --surface-container-low: #f3f4f6;
+            --outline: #9ca3af;
+            --outline-variant: #e5e7eb;
+            --error: #ef4444;
+        }
+
+        /* Dark mode fallback variables */
+        html.dark :root {
+            --on-surface-variant: #d1d5db;
+            --surface-container-low: #374151;
+            --outline: #6b7280;
+            --outline-variant: #374151;
+            --secondary-container: #064e3b;
+            --on-secondary-container: #34d399;
+        }
+
+        .bg-secondary-container { background-color: var(--secondary-container); }
+        .text-on-secondary-container { color: var(--on-secondary-container); }
+        .text-on-surface-variant { color: var(--on-surface-variant); }
+        .hover\:bg-surface-container-low:hover { background-color: var(--surface-container-low); }
+        .bg-surface-container-low { background-color: var(--surface-container-low); }
+        .text-outline { color: var(--outline); }
+        .border-outline-variant { border-color: var(--outline-variant); }
+        .text-error { color: var(--error); }
+        
+        .text-label-md { font-size: 14px; }
+        .text-label-sm { font-size: 12.5px; }
+        .font-label-md { font-weight: 500; }
+        .font-label-sm { font-weight: 400; }
+    </style>
+
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -26,14 +83,12 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@">
     <meta name="twitter:creator" content="@">
     <meta name="twitter:title" content="title">
     <meta name="twitter:description" content="description">
     <meta name="twitter:image" content="#">
-    <!-- Facebook -->
     <meta property="og:url" content="#">
     <meta property="og:title" content="title">
     <meta property="og:description" content="description">
@@ -42,7 +97,6 @@
     <meta property="og:image:type" content="image/png">
 
     <script>
-        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {

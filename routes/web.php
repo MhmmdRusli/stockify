@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockTransactionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\UserController; 
 use App\Http\Middleware\CheckRole; 
 
 /*
@@ -17,7 +18,7 @@ use App\Http\Middleware\CheckRole;
 */
 
 // ==========================================
-// 1. RUTE GUEST (Hanya Diakses Sebelum Login)
+// 1. RUTE GUEST (Sebelum Login)
 // ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -27,19 +28,17 @@ Route::middleware('guest')->group(function () {
 });
 
 // ==========================================
-// 2. RUTE GLOBAL (Bisa Diakses Semua Role Setelah Login)
+// 2. RUTE GLOBAL (Semua Role Setelah Login)
 // ==========================================
+// 🟢 KEMBALI MENGGUNAKAN HURUF KAPITAL SESUAI DATABASE KAMU
 Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudang'])->group(function () {
-    
-    // Halaman Utama Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
-    // Halaman Riwayat Transaksi (Semua role bisa melihat daftar tabelnya)
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/barang-masuk', [StockTransactionController::class, 'masukIndex'])->name('barang.masuk.index');
     Route::get('/barang-keluar', [StockTransactionController::class, 'keluarIndex'])->name('barang.keluar.index');
 
-    // Proses Keluar Aplikasi
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
@@ -47,46 +46,52 @@ Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudan
 // 3. RUTE BERSAMA: ADMIN & MANAJER GUDANG
 // ==========================================
 Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang'])->group(function () {
-    // Dipindah ke sini agar Manajer Gudang & Admin sama-sama punya akses CRUD Produk
-    Route::resource('products', ProductController::class);
+    Route::resource('products', ProductController::class)->except(['index']);
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    
+    // Fitur Laporan Bersama
+    Route::get('report/stock', [StockTransactionController::class, 'stockReport'])->name('report.stock');
+    Route::get('report/transactions', [StockTransactionController::class, 'transactionReport'])->name('report.transaction');
+
+    // Rute Export & Import Laporan
+    Route::get('report/stock/export-excel', [StockTransactionController::class, 'exportExcel'])->name('report.stock.excel');
+    Route::get('report/stock/export-pdf', [StockTransactionController::class, 'exportPdf'])->name('report.stock.pdf');
+    Route::post('report/stock/import', [StockTransactionController::class, 'importExcel'])->name('report.stock.import');
 });
 
 // ==========================================
-// 4. RUTE KHUSUS MANAJER GUDANG
+// 4. SINKRONISASI AKSI TRANSAKSI (Manajer Gudang & Staff Gudang)
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Manajer Gudang'])->group(function () {
-    // Hak Akses membuat Pengajuan Barang Baru (Store)
+Route::middleware(['auth', CheckRole::class . ':Manajer Gudang,Staff Gudang'])->group(function () {
     Route::post('/barang-masuk', [StockTransactionController::class, 'masukStore'])->name('barang.masuk.store');
     Route::post('/barang-keluar', [StockTransactionController::class, 'keluarStore'])->name('barang.keluar.store');
-
-    // Stock Opname
-    Route::prefix('admin')->group(function () {
-        Route::get('/opnames', [StockOpnameController::class, 'index'])->name('opnames.index');
-        Route::post('/opnames', [StockOpnameController::class, 'store'])->name('opnames.store');
-    });
-});
-
-// ==========================================
-// 5. RUTE KHUSUS STAFF GUDANG (Aksi Eksekusi Lapangan)
-// ==========================================
-Route::middleware(['auth', CheckRole::class . ':Staff Gudang'])->group(function () {
-    // Jalur Aksi Approval Transaksi (Hanya boleh diklik oleh Staff Gudang)
+    
     Route::post('/transactions/{id}/konfirmasi', [StockTransactionController::class, 'konfirmasi'])->name('transactions.konfirmasi');
     Route::post('/transactions/{id}/tolak', [StockTransactionController::class, 'tolak'])->name('transactions.tolak');
 });
 
 // ==========================================
-// 6. RUTE KHUSUS ADMIN (Akses Master Data & Audit)
+// 5. RUTE KHUSUS MANAJER GUDANG (Murni Opname)
+// ==========================================
+Route::middleware(['auth', CheckRole::class . ':Manajer Gudang'])->group(function () {
+    Route::get('/opnames', [StockOpnameController::class, 'index'])->name('opnames.index');
+    Route::post('/opnames', [StockOpnameController::class, 'store'])->name('opnames.store');
+});
+
+// ==========================================
+// 6. RUTE KHUSUS ADMIN (Master Data, Manajemen User & Log Aktivitas)
 // ==========================================
 Route::middleware(['auth', CheckRole::class . ':Admin'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index']); 
 
-    // Master Data Manajemen selain Produk (CRUD)
     Route::resource('categories', CategoryController::class);
-    Route::resource('suppliers', SupplierController::class);
-    
-    // Fitur Cetak Laporan Global
+    Route::resource('users', UserController::class); 
+
+    Route::resource('suppliers', SupplierController::class)->except(['index']);
+
+    Route::get('report/users-activity', [StockTransactionController::class, 'userActivityReport'])->name('report.user_activity');
     Route::get('transactions/print', [StockTransactionController::class, 'print'])->name('transactions.print');
+    Route::get('admin/settings', [DashboardController::class, 'settings'])->name('admin.settings'); 
 });
 
 // ==========================================
@@ -97,11 +102,6 @@ Route::get('/practice', function () {
 })->name('index-practice');
 
 Route::name('practice.')->prefix('practice')->group(function () {
-    Route::get('/1', function () {
-        return view('pages.practice.1');
-    })->name('first');
-    
-    Route::get('/2', function () {
-        return view('pages.practice.2');
-    })->name('second');
+    Route::get('/1', function () { return view('pages.practice.1'); })->name('first');
+    Route::get('/2', function () { return view('pages.practice.2'); })->name('second');
 });
