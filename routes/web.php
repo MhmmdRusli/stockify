@@ -30,12 +30,14 @@ Route::middleware('guest')->group(function () {
 // ==========================================
 // 2. RUTE GLOBAL (Semua Role Setelah Login)
 // ==========================================
-// 🟢 KEMBALI MENGGUNAKAN HURUF KAPITAL SESUAI DATABASE KAMU
 Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudang'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
+    // Rute Produk Global & Export
+    Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    
     Route::get('/barang-masuk', [StockTransactionController::class, 'masukIndex'])->name('barang.masuk.index');
     Route::get('/barang-keluar', [StockTransactionController::class, 'keluarIndex'])->name('barang.keluar.index');
 
@@ -47,6 +49,7 @@ Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudan
 // ==========================================
 Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang'])->group(function () {
     Route::resource('products', ProductController::class)->except(['index']);
+    Route::post('/products/import', [ProductController::class, 'import'])->name('products.import');
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     
     // Fitur Laporan Bersama
@@ -92,6 +95,7 @@ Route::middleware(['auth', CheckRole::class . ':Admin'])->group(function () {
     Route::get('report/users-activity', [StockTransactionController::class, 'userActivityReport'])->name('report.user_activity');
     Route::get('transactions/print', [StockTransactionController::class, 'print'])->name('transactions.print');
     Route::get('admin/settings', [DashboardController::class, 'settings'])->name('admin.settings'); 
+    Route::put('admin/settings', [DashboardController::class, 'updateSettings'])->name('admin.settings.update');
 });
 
 // ==========================================

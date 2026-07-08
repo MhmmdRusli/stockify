@@ -7,12 +7,14 @@
     <meta name="author" content="#">
     <meta name="generator" content="Laravel">
 
-    <title>Dashboard - </title>
+    {{-- ✨ DINAMIS: Menampilkan Nama Aplikasi dari database di Title Bar Browser --}}
+    <title>Dashboard - {{ \App\Models\Setting::where('key', 'app_name')->value('value') ?? 'Flowbite' }}</title>
+    
     @vite(['resources/css/app.css','resources/js/app.js'])
     <link rel="canonical" href="{{ request()->fullUrl() }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
     @if(isset($page->params['robots']))
         <meta name="robots" content="{{ $page->params['robots'] }}">
@@ -22,10 +24,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    {{-- ➕ TAMBAHAN: Google Material Symbols Outlined --}}
+    {{-- Google Material Symbols Outlined --}}
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
-    {{-- ➕ TAMBAHAN: Style CSS Pendukung Warna & Ikon (Sesuai Desain InventoryFlow) --}}
     <style>
         .material-symbols-outlined {
             display: inline-block;
@@ -50,7 +51,6 @@
             --error: #ef4444;
         }
 
-        /* Dark mode fallback variables */
         html.dark :root {
             --on-surface-variant: #d1d5db;
             --surface-container-low: #374151;
@@ -75,26 +75,24 @@
         .font-label-sm { font-weight: 400; }
     </style>
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" type="image/png" href="/favicon.ico">
+    {{-- ✨ DINAMIS: Favicon Ikon Tab Browser mengikuti logo yang diunggah --}}
+    @php
+        $favLogo = \App\Models\Setting::where('key', 'app_logo')->value('value');
+    @endphp
+    @if($favLogo)
+        <link rel="icon" type="image/png" href="{{ asset('storage/' . $favLogo) }}">
+        <link rel="apple-touch-icon" href="{{ asset('storage/' . $favLogo) }}">
+    @else
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="icon" type="image/png" href="/favicon.ico">
+    @endif
+    
     <link rel="manifest" href="/site.webmanifest">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@">
-    <meta name="twitter:creator" content="@">
-    <meta name="twitter:title" content="title">
-    <meta name="twitter:description" content="description">
-    <meta name="twitter:image" content="#">
-    <meta property="og:url" content="#">
-    <meta property="og:title" content="title">
-    <meta property="og:description" content="description">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="#">
-    <meta property="og:image:type" content="image/png">
 
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -109,15 +107,19 @@
 @endphp
 <body class="{{ $whiteBg ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800' }}">
     <x-navbar-dashboard/>
-    <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
+    
+    {{-- 💡 Jarak padding atas diperbaiki dari pt-16 menjadi pt-24 agar konten tidak mepet ke navbar --}}
+    <div class="flex pt-24 overflow-hidden bg-gray-50 dark:bg-gray-900">
         <x-sidebar.admin-sidebar/>
         <div id="main-content" class="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
             <main>
+                {{-- Bagian injector konten halaman --}}
                 @yield('content')
             </main>
             <x-footer-dashboard/>
         </div>
     </div>
+    
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.2/datepicker.min.js"></script>
 </body>

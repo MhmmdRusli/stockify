@@ -9,17 +9,17 @@
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Manajemen Data Supplier</h1>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola mitra pemasok, performa distribusi, dan informasi kontak resmi.</p>
         </div>
+        @if(Auth::check() && Auth::user()->role === 'Admin')
         <div class="shrink-0">
-            @if(Auth::check() && Auth::user()->role === 'Admin')
-            <button type="button" data-modal-target="add-supplier-modal" data-modal-toggle="add-supplier-modal" class="inline-flex items-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
+            <button type="button" data-modal-target="add-supplier-modal" data-modal-toggle="add-supplier-modal" class="inline-flex items-center gap-2 text-white bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                 <span class="material-symbols-outlined text-sm font-bold">add</span>
                 Tambah Supplier
             </button>
-            @endif
         </div>
+        @endif
     </div>
 
-    {{-- Notifikasi System --}}
+    {{-- Notifikasi --}}
     @if(session('success'))
         <div class="p-4 text-xs font-semibold text-green-700 bg-green-50 rounded-xl border border-green-100 dark:bg-gray-800 dark:text-green-400 dark:border-gray-700 shadow-2xs">
             {{ session('success') }}
@@ -35,7 +35,7 @@
         </div>
     @endif
 
-    {{-- 2. KARTU METRIK RINGKASAN (Agar Halaman Tidak Terlihat Kosong) --}}
+    {{-- 2. KARTU METRIK RINGKASAN --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xs flex items-center justify-between">
             <div class="space-y-1">
@@ -49,28 +49,36 @@
         <div class="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xs flex items-center justify-between">
             <div class="space-y-1">
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Kontak Terverifikasi</p>
-                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ $suppliers->whereNotNull('phone')->count() }} <span class="text-xs font-normal text-gray-400">Aktif</span>
                 </p>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
                 <span class="material-symbols-outlined text-xl">contact_phone</span>
             </div>
         </div>
         <div class="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xs flex items-center justify-between">
             <div class="space-y-1">
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Status Integrasi</p>
-                <p class="text-sm font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1 mt-1">
-                    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span> Terhubung Sistem
+                <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Terhubung Sistem
                 </p>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <span class="material-symbols-outlined text-xl">hub</span>
             </div>
         </div>
     </div>
 
-    {{-- 3. KONTEN TABEL DATA SUPPLIER --}}
+    {{-- 3. INPUT CARI DATA --}}
+    <div class="relative w-full">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400 dark:text-gray-500">
+            <span class="material-symbols-outlined text-lg">search</span>
+        </span>
+        <input type="text" id="supplierSearchInput" placeholder="Cari nama supplier, email, atau telepon..." class="w-full pl-11 pr-4 py-3 text-xs font-medium rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs placeholder:text-gray-400">
+    </div>
+
+    {{-- 4. KONTEN TABEL DATA SUPPLIER --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 text-left table-fixed">
@@ -88,8 +96,7 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @forelse($suppliers as $supplier)
                     <tr class="hover:bg-gray-50/40 dark:hover:bg-gray-700/20 transition-colors">
-                        {{-- Kolom Nama Supplier dengan Bulatan Biru Premium --}}
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-5 whitespace-nowrap">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold text-xs flex items-center justify-center uppercase shadow-xs shrink-0 border border-blue-100 dark:border-blue-900/50">
                                     {{ strtoupper(substr($supplier->name, 0, 2)) }}
@@ -100,21 +107,17 @@
                                 </div>
                             </div>
                         </td>
-                        {{-- Kolom Email --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 truncate">
                             {{ $supplier->email ?? '-' }}
                         </td>
-                        {{-- Kolom Telepon --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                             {{ $supplier->phone ?? '-' }}
                         </td>
-                        {{-- Kolom Alamat --}}
-                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 truncate">
+                        <td class="px-6 py-5 text-sm text-gray-500 dark:text-gray-400 truncate">
                             {{ $supplier->address ?? '-' }}
                         </td>
-                        {{-- Kolom Aksi Soft Background Khusus Admin --}}
                         @if(Auth::check() && Auth::user()->role === 'Admin')
-                        <td class="px-6 py-4 whitespace-nowrap text-right pr-8 space-x-1">
+                        <td class="px-6 py-5 whitespace-nowrap text-right pr-8 space-x-1">
                             <button type="button" data-modal-target="edit-supplier-modal-{{ $supplier->id }}" data-modal-toggle="edit-supplier-modal-{{ $supplier->id }}" class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50">
                                 <span class="material-symbols-outlined text-sm">edit</span>
                             </button>
@@ -129,7 +132,7 @@
                         @endif
                     </tr>
 
-                    {{-- 4. MODAL EDIT SUPPLIER --}}
+                    {{-- 5. MODAL EDIT SUPPLIER --}}
                     @if(Auth::check() && Auth::user()->role === 'Admin')
                     <div id="edit-supplier-modal-{{ $supplier->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
                         <div class="relative w-full max-w-md max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
@@ -158,7 +161,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Alamat Lengkap</label>
-                                        <textarea name="address" rows="3" class="w-full rounded-xl border-gray-200 text-xs dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 py-2.5" required>{{ $supplier->address }}</textarea>
+                                        <textarea name="address" rows="3" class="w-full rounded-xl border-gray-200 text-xs dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 py-2.5" required>{{ $supplier->address }}</textarea>
                                     </div>
                                 </div>
                                 <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end space-x-2">
@@ -181,13 +184,13 @@
     </div>
 </div>
 
-{{-- 5. MODAL TAMBAH SUPPLIER BARU --}}
+{{-- 6. MODAL TAMBAH SUPPLIER BARU --}}
 @if(Auth::check() && Auth::user()->role === 'Admin')
 <div id="add-supplier-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
     <div class="relative w-full max-w-md max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
         <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-5">
             <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-emerald-600">playlist_add</span> Tambah Supplier Baru
+                <span class="material-symbols-outlined text-amber-500">playlist_add</span> Tambah Supplier Baru
             </h3>
             <button type="button" data-modal-toggle="add-supplier-modal" class="text-gray-400 hover:text-gray-500 flex items-center"><span class="material-symbols-outlined">close</span></button>
         </div>
@@ -214,11 +217,22 @@
             </div>
             <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end space-x-2">
                 <button type="button" data-modal-toggle="add-supplier-modal" class="px-4 py-2.5 text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">Batal</button>
-                <button type="submit" class="px-4 py-2.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs">Simpan Supplier</button>
+                <button type="submit" class="px-4 py-2.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-xs">Simpan Supplier</button>
             </div>
         </form>
     </div>
 </div>
 @endif
 
+{{-- 7. SCRIPT LIVE PENCARIAN --}}
+<script>
+    document.getElementById('supplierSearchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
 @endsection

@@ -10,8 +10,8 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola pengelompokan produk, jenis inventaris, dan klasifikasi barang gudang.</p>
         </div>
         <div class="shrink-0">
-            {{-- Tombol Tambah diganti warna Hijau Emerald --}}
-            <button type="button" data-modal-target="add-category-modal" data-modal-toggle="add-category-modal" class="inline-flex items-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
+            {{-- Tombol Tambah diganti warna Kuning Amber --}}
+            <button type="button" data-modal-target="add-category-modal" data-modal-toggle="add-category-modal" class="inline-flex items-center gap-2 text-white bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                 <span class="material-symbols-outlined text-sm font-bold">add</span>
                 Tambah Kategori
             </button>
@@ -168,7 +168,7 @@
     <div class="relative w-full max-w-md max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
         <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-5">
             <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-emerald-600">playlist_add</span> Tambah Kategori Baru
+                <span class="material-symbols-outlined text-amber-500">playlist_add</span> Tambah Kategori Baru
             </h3>
             <button type="button" data-modal-toggle="add-category-modal" class="text-gray-400 hover:text-gray-500 flex items-center"><span class="material-symbols-outlined">close</span></button>
         </div>
@@ -182,7 +182,7 @@
             </div>
             <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end space-x-2">
                 <button type="button" data-modal-toggle="add-category-modal" class="px-4 py-2.5 text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">Batal</button>
-                <button type="submit" class="px-4 py-2.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs">Simpan Kategori</button>
+                <button type="submit" class="px-4 py-2.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-xs">Simpan Kategori</button>
             </div>
         </form>
     </div>
