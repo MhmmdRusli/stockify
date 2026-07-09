@@ -28,7 +28,7 @@ class StockTransactionController extends Controller
     public function masukIndex()
     {
         $transactions = StockTransaction::where('type', 'in')->with('product')->latest()->get();
-        $products = Product::all(); 
+        $products = Product::all();
 
         return view('admin.transactions.masuk', compact('transactions', 'products'));
     }
@@ -43,8 +43,8 @@ class StockTransactionController extends Controller
 
         $validated['type'] = 'in';
         $validated['date'] = now()->toDateString();
-        $validated['user_id'] = auth()->id() ?? 1; 
-        $validated['status'] = 'Pending'; 
+        $validated['user_id'] = auth()->id() ?? 1;
+        $validated['status'] = 'Pending';
 
         StockTransaction::create($validated);
 
@@ -57,7 +57,7 @@ class StockTransactionController extends Controller
     public function keluarIndex()
     {
         $transactions = StockTransaction::where('type', 'out')->with('product')->latest()->get();
-        $products = Product::all(); 
+        $products = Product::all();
 
         return view('admin.transactions.keluar', compact('transactions', 'products'));
     }
@@ -71,14 +71,17 @@ class StockTransactionController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        if ($product->minimum_stock < $request->quantity) {
+
+        // FIX: Validasi kecukupan stok pakai kolom 'stock' (stok aktual),
+        // BUKAN 'minimum_stock' yang cuma ambang batas/reminder statis.
+        if ($product->stock < $request->quantity) {
             return redirect()->back()->with('error', 'Gagal mengajukan! Stok di gudang tidak mencukupi.');
         }
 
         $validated['type'] = 'out';
         $validated['date'] = now()->toDateString();
-        $validated['user_id'] = auth()->id() ?? 1; 
-        $validated['status'] = 'Pending'; 
+        $validated['user_id'] = auth()->id() ?? 1;
+        $validated['status'] = 'Pending';
 
         StockTransaction::create($validated);
 
@@ -91,21 +94,24 @@ class StockTransactionController extends Controller
     public function konfirmasi($id)
     {
         $transaction = StockTransaction::findOrFail($id);
-        
+
         if ($transaction->status !== 'Pending') {
             return redirect()->back()->with('error', 'Transaksi ini sudah diproses sebelumnya!');
         }
 
         $product = Product::findOrFail($transaction->product_id);
 
+        // FIX: Update kolom 'stock' (stok aktual gudang), BUKAN 'minimum_stock'.
+        // 'minimum_stock' adalah ambang batas statis yang cuma diubah manual
+        // lewat form edit produk, tidak boleh ikut berubah oleh transaksi.
         if ($transaction->type === 'in') {
-            $product->increment('minimum_stock', $transaction->quantity);
+            $product->increment('stock', $transaction->quantity);
             $transaction->update(['status' => 'Diterima']);
         } else if ($transaction->type === 'out') {
-            if ($product->minimum_stock < $transaction->quantity) {
+            if ($product->stock < $transaction->quantity) {
                 return redirect()->back()->with('error', 'Gagal konfirmasi! Stok aktual di gudang tidak cukup.');
             }
-            $product->decrement('minimum_stock', $transaction->quantity);
+            $product->decrement('stock', $transaction->quantity);
             $transaction->update(['status' => 'Dikeluarkan']);
         }
 

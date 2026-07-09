@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "apexcharts": "^3.54.0",
-        "flowbite-typography": "^1.0.4"
+        "flowbite-typography": "^1.0.4",
+        "sweetalert2": "^11.26.25"
     }
 }

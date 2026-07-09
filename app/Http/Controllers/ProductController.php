@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Services\ProductService;
 use App\Models\Category;
 use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Exports\ProductsExport;
 use App\Imports\ProductsImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -90,9 +92,16 @@ class ProductController extends Controller
             'purchase_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'minimum_stock' => 'required|integer|min:0',
+            'stock' => 'nullable|integer|min:0',
             'sku' => 'nullable|string|max:50|unique:products,sku',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        // Simpan file gambar (jika diupload) ke storage/app/public/products
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('products', 'public');
+        }
 
         $this->productService->storeProduct($validated);
 
@@ -116,7 +125,21 @@ class ProductController extends Controller
             'minimum_stock' => 'required|integer|min:0',
             'sku' => 'nullable|string|max:50|unique:products,sku,' . $id,
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        // Jika ada file gambar baru diupload, simpan yang baru & hapus yang lama
+        if ($request->hasFile('image')) {
+            $product = Product::findOrFail($id);
+
+            if (!empty($product->image) && Storage::disk('public')->exists($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('products', 'public');
+        }
+        // Kalau tidak ada file baru diupload, field 'image' TIDAK dimasukkan ke $validated
+        // sama sekali, jadi gambar lama di database tidak akan ter-overwrite jadi kosong.
 
         $this->productService->updateProduct($id, $validated);
 
@@ -129,6 +152,11 @@ class ProductController extends Controller
         // Proteksi backend: Jika Staff Gudang mencoba bypass, gagalkan dengan 403
         if (Auth::check() && Auth::user()->role === 'Staff Gudang') {
             abort(403, 'Anda tidak memiliki hak akses untuk menghapus produk.');
+        }
+
+        $product = Product::find($id);
+        if ($product && !empty($product->image) && Storage::disk('public')->exists($product->image)) {
+            Storage::disk('public')->delete($product->image);
         }
 
         $this->productService->deleteProduct($id);

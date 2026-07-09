@@ -10,9 +10,9 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'supplier_id', 'name', 'sku', 
-        'description', 'purchase_price', 'selling_price', 
-        'image', 'minimum_stock'
+        'category_id', 'supplier_id', 'name', 'sku',
+        'description', 'purchase_price', 'selling_price',
+        'image', 'minimum_stock', 'stock'
     ];
 
     // Relasi balik: Produk ini dimiliki oleh sebuah Kategori

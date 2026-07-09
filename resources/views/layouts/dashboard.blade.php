@@ -27,6 +27,9 @@
     {{-- Google Material Symbols Outlined --}}
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
+    {{-- 🆕 ApexCharts: dibutuhkan untuk chart di dashboard Admin --}}
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
     <style>
         .material-symbols-outlined {
             display: inline-block;
@@ -112,15 +115,20 @@
     <div class="flex pt-24 overflow-hidden bg-gray-50 dark:bg-gray-900">
         <x-sidebar.admin-sidebar/>
         <div id="main-content" class="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
-            <main>
-                {{-- Bagian injector konten halaman --}}
-                @yield('content')
-            </main>
+            <div class="p-4 space-y-4">
+                <main>
+                    {{-- Bagian injector konten halaman --}}
+                    @yield('content')
+                </main>
+            </div>
             <x-footer-dashboard/>
         </div>
     </div>
     
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.2/datepicker.min.js"></script>
+
+    {{-- 🟢 KUNCI PERBAIKAN: Tempat menampung script JS dari halaman view (kalau ada) --}}
+    @stack('scripts')
 </body>
 </html>

@@ -10,7 +10,7 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola pengeluaran stok barang untuk distribusi toko, pesanan, atau mutasi eksternal.</p>
         </div>
         <div class="shrink-0 flex items-center gap-2 w-full sm:w-auto">
-            {{-- FIX: Export Report disembunyikan dari Staff Gudang. Staff hanya bertugas
+            {{-- Export Report disembunyikan dari Staff Gudang. Staff hanya bertugas
                  menyiapkan & mengirimkan barang keluar (Setujui/Tolak), bukan melihat laporan. --}}
             @if(strtolower(auth()->user()->role) !== 'staff gudang')
                 <button type="button" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
@@ -142,29 +142,102 @@
                             @endif
                         </td>
                         <td class="px-6 py-5 whitespace-nowrap text-right pr-8">
-                            @if($item->status === 'Pending')
-                                {{-- Setujui/Tolak khusus Staff Gudang, sesuai spek
-                                     "Menyiapkan dan mengirimkan barang keluar". Admin & Manajer
-                                     Gudang (pembuat pengajuan) tidak menampilkan tombol ini. --}}
-                                @if(strtolower(auth()->user()->role) === 'staff gudang')
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <form action="{{ route('transactions.konfirmasi', $item->id) }}" method="POST" onsubmit="return confirm('Konfirmasi pengeluaran barang ini?')">
-                                            @csrf
-                                            <button type="submit" class="px-3 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-semibold rounded-xl text-[11px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors">Setujui</button>
-                                        </form>
-                                        <form action="{{ route('transactions.tolak', $item->id) }}" method="POST" onsubmit="return confirm('Tolak pengajuan pengeluaran ini?')">
-                                            @csrf
-                                            <button type="submit" class="px-3 py-2 text-red-700 bg-red-50 hover:bg-red-100/80 font-semibold rounded-xl text-[11px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors">Tolak</button>
-                                        </form>
-                                    </div>
+                            <div class="flex items-center justify-end gap-1.5">
+                                {{-- 🆕 TOMBOL LIHAT DETAIL: tersedia untuk semua role, buka modal info lengkap --}}
+                                <button type="button" data-modal-target="detail-keluar-modal-{{ $item->id }}" data-modal-toggle="detail-keluar-modal-{{ $item->id }}" class="p-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50" title="Lihat Detail">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                </button>
+
+                                @if($item->status === 'Pending')
+                                    {{-- Setujui/Tolak khusus Staff Gudang, sesuai spek
+                                         "Menyiapkan dan mengirimkan barang keluar". Admin & Manajer
+                                         Gudang (pembuat pengajuan) tidak menampilkan tombol ini. --}}
+                                    @if(strtolower(auth()->user()->role) === 'staff gudang')
+                                        <button type="button"
+                                            onclick="konfirmasiAksi('{{ route('transactions.konfirmasi', $item->id) }}', 'Setujui')"
+                                            class="px-3 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-semibold rounded-xl text-[11px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors">
+                                            Setujui
+                                        </button>
+                                        <button type="button"
+                                            onclick="konfirmasiAksi('{{ route('transactions.tolak', $item->id) }}', 'Tolak')"
+                                            class="px-3 py-2 text-red-700 bg-red-50 hover:bg-red-100/80 font-semibold rounded-xl text-[11px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors">
+                                            Tolak
+                                        </button>
+                                    @else
+                                        <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Menunggu verifikasi Staff</span>
+                                    @endif
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Menunggu verifikasi Staff</span>
+                                    <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Sudah diproses</span>
                                 @endif
-                            @else
-                                <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Sudah diproses</span>
-                            @endif
+                            </div>
                         </td>
                     </tr>
+
+                    {{-- 🆕 MODAL DETAIL TRANSAKSI: menampilkan keterangan/catatan lengkap tanpa terpotong --}}
+                    <div id="detail-keluar-modal-{{ $item->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
+                        <div class="relative w-full max-w-lg max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
+                            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-5">
+                                <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-red-600">receipt_long</span>
+                                    Detail Transaksi <span class="text-red-600 dark:text-red-400 font-mono text-sm">#OUT-{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                </h3>
+                                <button type="button" data-modal-toggle="detail-keluar-modal-{{ $item->id }}" class="text-gray-400 hover:text-gray-500 flex items-center"><span class="material-symbols-outlined">close</span></button>
+                            </div>
+
+                            <div class="space-y-4 text-left">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Produk</p>
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $item->product->name ?? 'Produk Terhapus' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">SKU</p>
+                                        <p class="text-sm font-mono text-gray-700 dark:text-gray-300">{{ $item->product->sku ?? '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Waktu Keluar</p>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}</p>
+                                        <p class="text-[11px] text-gray-400 dark:text-gray-500">{{ $item->created_at->format('H:i A') }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Jumlah</p>
+                                        <p class="text-sm font-bold text-red-600 dark:text-red-400">-{{ $item->quantity }} Pcs</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Status</p>
+                                        @if($item->status === 'Pending')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                                            </span>
+                                        @elseif($item->status === 'Dikeluarkan' || $item->status === 'Diterima')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Selesai
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Ditolak
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Tipe</p>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold uppercase tracking-wider dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
+                                            <span class="material-symbols-outlined text-xs">arrow_upward</span> Keluar
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+                                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Keterangan / Tujuan Distribusi</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 p-3 rounded-xl leading-relaxed whitespace-pre-line">{{ $item->notes ?? 'Tidak ada catatan' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+                                <button type="button" data-modal-toggle="detail-keluar-modal-{{ $item->id }}" class="px-4 py-2.5 text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
                     @empty
                     <tr>
                         <td colspan="9" class="px-6 py-12 text-center text-sm font-medium text-gray-400 dark:text-gray-500">
@@ -196,8 +269,9 @@
                     <label for="product_id" class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Pilih Produk</label>
                     <select name="product_id" id="product_id" required class="w-full rounded-xl border-gray-200 text-xs dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 py-2.5">
                         <option value="" disabled selected>-- Pilih Produk di Gudang --</option>
+                        {{-- FIX: tampilkan stok AKTUAL ($prod->stock), bukan minimum_stock (ambang batas statis) --}}
                         @foreach($products as $prod)
-                            <option value="{{ $prod->id }}">{{ $prod->name }} (Stok Saat Ini: {{ $prod->minimum_stock }})</option>
+                            <option value="{{ $prod->id }}">{{ $prod->name }} (Stok Saat Ini: {{ $prod->stock }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -220,6 +294,7 @@
 @endif
 
 {{-- 6. SCRIPT LIVE PENCARIAN --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('table-search');
@@ -248,5 +323,47 @@
             });
         }
     });
+
+    {{-- 🆕 KONFIRMASI SETUJUI/TOLAK: pakai SweetAlert2, disamakan persis dengan halaman Barang Masuk --}}
+    function konfirmasiAksi(url, tipe) {
+        let buttonColorClass = tipe === 'Setujui'
+            ? 'bg-amber-500 hover:bg-amber-600 text-white'
+            : 'bg-red-500 hover:bg-red-600 text-white';
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                popup: 'rounded-2xl shadow-xl',
+                title: 'text-lg font-bold',
+                confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors ${buttonColorClass}`,
+                cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors',
+                icon: tipe === 'Setujui' ? 'border-amber-500 text-amber-500' : 'border-red-500 text-red-500'
+            },
+            buttonsStyling: false
+        });
+
+        swalWithBootstrapButtons.fire({
+            title: 'Konfirmasi',
+            text: `Anda yakin ingin ${tipe} data ini?`,
+            icon: tipe === 'Setujui' ? 'question' : 'error',
+            width: '320px',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Lanjut',
+            cancelButtonText: 'Batal',
+            didOpen: (popup) => {
+                if (tipe === 'Setujui') {
+                    const icon = popup.querySelector('.swal2-question');
+                    if (icon) icon.style.color = '#f59e0b';
+                    if (icon) icon.style.borderColor = '#f59e0b';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let form = document.createElement('form');
+                form.action = url; form.method = 'POST';
+                form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">`;
+                document.body.appendChild(form); form.submit();
+            }
+        });
+    }
 </script>
 @endsection
