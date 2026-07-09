@@ -43,16 +43,12 @@
               Hasil Pencarian Menu
             </div>
             <ul id="search-results-list" class="py-1 text-sm text-gray-700 dark:text-gray-200 max-h-60 overflow-y-auto">
-              </ul>
+            </ul>
           </div>
         </div>
       </div>
 
       <div class="flex items-center">
-        <div class="hidden mr-3 -mb-1 sm:block">
-          <a class="github-button" href="https://github.com/themesberg/flowbite-admin-dashboard" data-color-scheme="no-preference: dark; light: light; dark: light;" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star themesberg/flowbite-admin-dashboard on GitHub">Star</a>
-        </div>
-
         <button id="toggleSidebarMobileSearch" type="button" class="p-2 text-gray-500 rounded-lg lg:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
           <span class="sr-only">Search</span>
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
@@ -69,7 +65,7 @@
             Notifikasi
           </div>
           <div>
-            <a href="#" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
+            <a href="{{ url('/barang-masuk') }}" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
               <div class="flex-shrink-0">
                 <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
@@ -80,7 +76,7 @@
                 <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">beberapa saat lalu</div>
               </div>
             </a>
-            <a href="#" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
+            <a href="{{ url('/products') }}" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
               <div class="flex-shrink-0">
                 <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
@@ -92,7 +88,7 @@
               </div>
             </a>
           </div>
-          <a href="{{ route('report.transaction') }}" class="block py-2.5 rak-tag text-sm font-medium text-center text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-[#0C1220] dark:text-gray-300 dark:hover:bg-gray-800">
+          <a href="{{ url('/report/transactions') }}" class="block py-2.5 rak-tag text-sm font-medium text-center text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-[#0C1220] dark:text-gray-300 dark:hover:bg-gray-800">
             <div class="inline-flex items-center">
               Lihat semua
             </div>
@@ -101,18 +97,16 @@
 
         <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="text-gray-500 dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
           <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1zm6 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
         </button>
         <div id="tooltip-toggle" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 rak-tag text-xs font-medium text-white transition-opacity duration-300 bg-[#111826] rounded-lg shadow-sm opacity-0 tooltip">
           Ganti tema gelap/terang
           <div class="tooltip-arrow" data-popper-arrow></div>
         </div>
 
-        {{-- PROFILE: DIGANTI JADI AVATAR INISIAL --}}
         <div class="flex items-center ml-3">
           @php
               $userName = Auth::user()->name ?? 'Guest';
-              // Ambil huruf depan dari maksimal 2 kata pertama (mis. "Rusli Setiawan" -> "RS", "Rusli" -> "RU")
               $nameParts = explode(' ', trim($userName));
               if (count($nameParts) >= 2) {
                   $initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1));
@@ -123,12 +117,7 @@
           <div>
             <button type="button" class="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-[#1E293B] to-[#0C1220] text-amber-400 font-bold text-xs uppercase ring-2 ring-amber-400/60 hover:ring-amber-400 focus:ring-4 focus:ring-amber-200 dark:focus:ring-amber-900/40 transition-all" id="user-menu-button-2" aria-expanded="false" data-dropdown-toggle="dropdown-2">
               <span class="sr-only">Buka menu pengguna</span>
-              {{-- 💡 Kalau nanti mau pakai foto asli, tinggal tambahkan kondisi di sini:
-              @if(Auth::user()->avatar)
-                  <img class="w-9 h-9 rounded-full object-cover" src="{{ asset('storage/'.Auth::user()->avatar) }}" alt="foto profil">
-              @else --}}
               {{ $initials }}
-              {{-- @endif --}}
             </button>
           </div>
           <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-xl shadow-lg border border-gray-100 dark:bg-[#111826] dark:divide-gray-700 dark:border-gray-700 overflow-hidden" id="dropdown-2">
@@ -171,7 +160,7 @@
       { name: 'Data Supplier / Pemasok', url: "{{ url('/suppliers') }}", keywords: 'supplier pemasok vendor agen pihak ketiga' },
       { name: 'Transaksi Barang Masuk (Inbound)', url: "{{ url('/barang-masuk') }}", keywords: 'barang masuk inbound restock kulakan supplier pasokan tambah stok buy' },
       { name: 'Transaksi Barang Keluar (Outbound)', url: "{{ url('/barang-keluar') }}", keywords: 'barang keluar outbound packing logistik delivery pengurangan stok sale' },
-      { name: 'Laporan Arus Log Masuk & Keluar', url: "{{ route('report.transaction') }}", keywords: 'laporan mutasi arus log transaksi masuk keluar history riwayat barang' },
+      { name: 'Laporan Arus Log Masuk & Keluar', url: "{{ url('/report/transactions') }}", keywords: 'laporan mutasi arus log transaksi masuk keluar history riwayat barang' },
       { name: 'Laporan Stok Barang', url: "{{ url('/report/stock') }}", keywords: 'laporan stok barang inventory report sisa opname balance gudang' },
       { name: 'User Activity / Log Aktivitas', url: "{{ url('/report/users-activity') }}", keywords: 'user activity log aktivitas audit trail riwayat tindakan login admin pegawai track' },
       { name: 'Manajemen User / Pengguna', url: "{{ url('/users') }}", keywords: 'user pengguna pegawai staff admin kelompok hak akses manajemen list kelola' },
