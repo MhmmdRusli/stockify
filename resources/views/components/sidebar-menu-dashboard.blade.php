@@ -45,7 +45,7 @@
     @endif
 
     {{-- 📋 STOCK OPNAME --}}
-    @if(Auth::check() && Auth::user()->role === 'Manajer Gudang')
+    @if(Auth::check() && in_array(Auth::user()->role, ['Admin', 'Manajer Gudang']))
     <li>
         <a href="{{ route('opnames.index') }}" class="flex items-center gap-4 px-5 py-3.5 mx-3 rounded-xl transition-all duration-300 {{ Request::is('opnames*') ? 'bg-amber-50 text-gray-950 font-bold shadow-md border-l-4 border-amber-500 dark:bg-amber-950/20 dark:text-amber-300 dark:border-amber-500' : 'text-gray-600 hover:bg-gray-50/80 dark:text-gray-400 dark:hover:bg-gray-800/50 group' }}">
             <span class="material-symbols-outlined !text-2xl transition-colors {{ Request::is('opnames*') ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500 dark:text-gray-500' }}">assignment</span>

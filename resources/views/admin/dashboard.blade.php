@@ -88,7 +88,6 @@
     <div class="lg:col-span-2 p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center justify-between mb-1">
             <div>
-                <p class="rak-tag text-[10px] font-semibold text-amber-500 uppercase">Log // Weekly Throughput</p>
                 <h3 class="font-display text-base font-bold text-gray-900 dark:text-white tracking-tight">Tren Transaksi 7 Hari Terakhir</h3>
             </div>
         </div>

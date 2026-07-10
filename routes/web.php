@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockTransactionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\UserController; 
 use App\Http\Middleware\CheckRole; 
 
@@ -30,7 +31,7 @@ Route::middleware('guest')->group(function () {
 // ==========================================
 // 2. RUTE GLOBAL (Semua Role Setelah Login)
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudang'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudang,admin,manajer gudang,staff gudang'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
@@ -41,13 +42,17 @@ Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudan
     Route::get('/barang-masuk', [StockTransactionController::class, 'masukIndex'])->name('barang.masuk.index');
     Route::get('/barang-keluar', [StockTransactionController::class, 'keluarIndex'])->name('barang.keluar.index');
 
+    Route::get('/api/categories', function() {
+        return response()->json(\App\Models\Category::all());
+    })->name('api.categories.index');
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // ==========================================
 // 3. RUTE BERSAMA: ADMIN & MANAJER GUDANG
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,admin,manajer gudang'])->group(function () {
     Route::resource('products', ProductController::class)->except(['index']);
     Route::post('/products/import', [ProductController::class, 'import'])->name('products.import');
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
@@ -63,9 +68,9 @@ Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang'])->group(f
 });
 
 // ==========================================
-// 4. SINKRONISASI AKSI TRANSAKSI (Manajer Gudang & Staff Gudang)
+// 4. SINKRONISASI AKSI TRANSAKSI (Admin, Manajer Gudang & Staff Gudang)
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Manajer Gudang,Staff Gudang'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudang,admin,manajer gudang,staff gudang'])->group(function () {
     Route::post('/barang-masuk', [StockTransactionController::class, 'masukStore'])->name('barang.masuk.store');
     Route::post('/barang-keluar', [StockTransactionController::class, 'keluarStore'])->name('barang.keluar.store');
     
@@ -76,7 +81,7 @@ Route::middleware(['auth', CheckRole::class . ':Manajer Gudang,Staff Gudang'])->
 // ==========================================
 // 5. RUTE KHUSUS MANAJER GUDANG (Murni Opname)
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Manajer Gudang'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,manajer gudang'])->group(function () {
     Route::get('/opnames', [StockOpnameController::class, 'index'])->name('opnames.index');
     Route::post('/opnames', [StockOpnameController::class, 'store'])->name('opnames.store');
 });
@@ -84,7 +89,7 @@ Route::middleware(['auth', CheckRole::class . ':Manajer Gudang'])->group(functio
 // ==========================================
 // 6. RUTE KHUSUS ADMIN (Master Data, Manajemen User & Log Aktivitas)
 // ==========================================
-Route::middleware(['auth', CheckRole::class . ':Admin'])->group(function () {
+Route::middleware(['auth', CheckRole::class . ':Admin,admin'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index']); 
 
     Route::resource('categories', CategoryController::class);
@@ -108,4 +113,13 @@ Route::get('/practice', function () {
 Route::name('practice.')->prefix('practice')->group(function () {
     Route::get('/1', function () { return view('pages.practice.1'); })->name('first');
     Route::get('/2', function () { return view('pages.practice.2'); })->name('second');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/report/user-activity', [UserActivityController::class, 'index'])
+        ->name('report.user_activity.index');
+
+    Route::get('/report/user-activity/print', [UserActivityController::class, 'print'])
+        ->name('report.user_activity.print');
 });

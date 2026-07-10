@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\StockTransactionService;
 use App\Models\Product;
+use App\Models\Category; 
 use App\Models\StockTransaction;
 use Illuminate\Http\Request;
 
-// 🟢 KOREKSI: WAJIB DI-IMPORT AGAR FITUR EXCEL & PDF TIDAK ERROR
+// IMPORT UTUK EXCEL & PDF
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ProductsExport;
@@ -27,28 +28,75 @@ class StockTransactionController extends Controller
     // ==========================================
     public function masukIndex()
     {
+        // Mengambil semua transaksi masuk baik Pending, Diterima, maupun Ditolak
         $transactions = StockTransaction::where('type', 'in')->with('product')->latest()->get();
+        $categories = Category::all();
         $products = Product::all();
 
-        return view('admin.transactions.masuk', compact('transactions', 'products'));
+        return view('admin.transactions.masuk', compact('transactions', 'products', 'categories'));
     }
 
     public function masukStore(Request $request)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity'   => 'required|integer|min:1',
-            'notes'      => 'nullable|string',
+        // 1. Jalankan Validasi khusus untuk Ajukan Produk Baru dari Staff
+        $request->validate([
+            'new_product_name'  => 'required|string|max:255',
+            'category_id'       => 'required',
+            'quantity'          => 'required|integer|min:1',
         ]);
 
-        $validated['type'] = 'in';
-        $validated['date'] = now()->toDateString();
-        $validated['user_id'] = auth()->id() ?? 1;
-        $validated['status'] = 'Pending';
+        try {
+            $categoryId = $request->category_id;
 
-        StockTransaction::create($validated);
+            // 2. Cek apakah staff membuat kategori baru langsung dari modal
+            if ($request->category_id === 'NEW_CATEGORY') {
+                $request->validate(['new_category_name' => 'required|string|max:255']);
 
-        return redirect()->route('barang.masuk.index')->with('success', 'Pengajuan barang masuk berhasil dibuat! Menunggu konfirmasi Staff.');
+                $newCat = \App\Models\Category::create([
+                    'name' => $request->new_category_name
+                ]);
+                $categoryId = $newCat->id;
+            }
+
+            // 3. Ambil Supplier ID default agar database tidak error
+            // Kita ambil ID supplier pertama yang tersedia di database kamu
+            $defaultSupplier = \App\Models\Supplier::first();
+            $supplierId = $defaultSupplier ? $defaultSupplier->id : null;
+
+            // Buat kode SKU otomatis jika dikosongkan
+            $sku = $request->sku ?? 'SKU-' . strtoupper(uniqid());
+
+            // 4. Buat data Produk Baru (sebagai draft)
+            // Field harga & minimum stok sengaja diisi 0 dulu karena staff gudang
+            // belum tentu tahu harga beli/jual — nanti manajer/admin yang
+            // melengkapi via halaman Data Produk setelah draft disetujui.
+            $newProduct = \App\Models\Product::create([
+                'name'           => $request->new_product_name,
+                'category_id'    => $categoryId,
+                'supplier_id'    => $supplierId, // Mengatasi error 'supplier_id' doesn't have a default value
+                'sku'            => $sku,
+                'stock'          => 0, // Stok awal tetap 0 sebelum disetujui Manajer
+                'purchase_price' => 0, // Mengatasi error 'purchase_price' doesn't have a default value
+                'selling_price'  => 0, // Mengatasi error 'selling_price' doesn't have a default value
+                'minimum_stock'  => 0, // Mengatasi error 'minimum_stock' doesn't have a default value
+            ]);
+
+            // 5. Simpan ke transaksi stok dengan status 'Pending'
+            \App\Models\StockTransaction::create([
+                'product_id'   => $newProduct->id,
+                'user_id'      => auth()->id(),
+                'type'         => 'in',
+                'quantity'     => $request->quantity,
+                'date'         => now()->toDateString(),
+                'status'       => 'Pending', // Status pending untuk staff gudang
+                'notes'        => $request->notes ?? 'Pengajuan barang masuk baru oleh Staff',
+            ]);
+
+            return redirect()->route('barang.masuk.index')->with('success', 'Draft barang masuk baru berhasil diajukan! Menunggu verifikasi manajer.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Gagal mengajukan draft: ' . $e->getMessage());
+        }
     }
 
     // ==========================================
@@ -72,8 +120,7 @@ class StockTransactionController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        // FIX: Validasi kecukupan stok pakai kolom 'stock' (stok aktual),
-        // BUKAN 'minimum_stock' yang cuma ambang batas/reminder statis.
+        // Validasi kecukupan stok pakai kolom 'stock' (stok aktual)
         if ($product->stock < $request->quantity) {
             return redirect()->back()->with('error', 'Gagal mengajukan! Stok di gudang tidak mencukupi.');
         }
@@ -85,7 +132,8 @@ class StockTransactionController extends Controller
 
         StockTransaction::create($validated);
 
-        return redirect()->route('barang.keluar.index')->with('success', 'Pengajuan barang keluar berhasil dibuat! Menunggu konfirmasi Staff.');
+        // KOREKSI: Menggunakan redirect()->back()
+        return redirect()->back()->with('success', 'Pengajuan barang keluar berhasil dibuat! Menunggu konfirmasi Staff.');
     }
 
     // ==========================================
@@ -101,9 +149,6 @@ class StockTransactionController extends Controller
 
         $product = Product::findOrFail($transaction->product_id);
 
-        // FIX: Update kolom 'stock' (stok aktual gudang), BUKAN 'minimum_stock'.
-        // 'minimum_stock' adalah ambang batas statis yang cuma diubah manual
-        // lewat form edit produk, tidak boleh ikut berubah oleh transaksi.
         if ($transaction->type === 'in') {
             $product->increment('stock', $transaction->quantity);
             $transaction->update(['status' => 'Diterima']);
@@ -182,7 +227,6 @@ class StockTransactionController extends Controller
     public function importExcel(Request $request)
     {
         $request->validate([
-            // 🟢 KOREKSI OPTIMASI: Ditambahkan ekstensi agar pembacaan file .xlsx lebih toleran di beberapa operating system
             'file' => 'required|file|mimes:xlsx,xls,csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet|max:2048'
         ]);
 
