@@ -10,7 +10,6 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola pengelompokan produk, jenis inventaris, dan klasifikasi barang gudang.</p>
         </div>
         <div class="shrink-0">
-            {{-- Tombol Tambah diganti warna Kuning Amber --}}
             <button type="button" data-modal-target="add-category-modal" data-modal-toggle="add-category-modal" class="inline-flex items-center gap-2 text-white bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                 <span class="material-symbols-outlined text-sm font-bold">add</span>
                 Tambah Kategori
@@ -91,7 +90,6 @@
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @forelse($categories as $category)
                     <tr class="hover:bg-gray-50/40 dark:hover:bg-gray-700/20 transition-colors">
-                        {{-- Kolom Kategori dengan Icon Avatar BULAT BIRU --}}
                         <td class="px-6 py-5 whitespace-nowrap">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 font-bold text-xs flex items-center justify-center uppercase shadow-xs shrink-0 border border-blue-100 dark:border-blue-900/50">
@@ -103,7 +101,6 @@
                                 </div>
                             </div>
                         </td>
-                        {{-- Kolom Jumlah Produk --}}
                         <td class="px-6 py-5 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -112,15 +109,15 @@
                                 <span class="text-xs text-gray-400 dark:text-gray-500">item terdaftar</span>
                             </div>
                         </td>
-                        {{-- Kolom Aksi Premium Soft Background --}}
                         <td class="px-6 py-5 whitespace-nowrap text-right pr-8 space-x-1">
                             <button type="button" data-modal-target="edit-category-modal-{{ $category->id }}" data-modal-toggle="edit-category-modal-{{ $category->id }}" class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50">
                                 <span class="material-symbols-outlined text-sm">edit</span>
                             </button>
-                            <form action="{{ route('categories.destroy', $category->id) }}" method="POST" class="inline">
+                            {{-- 🆕 Form hapus tersembunyi + tombol trigger SweetAlert2 --}}
+                            <form id="delete-category-form-{{ $category->id }}" action="{{ route('categories.destroy', $category->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Hapus kategori ini? Semua produk di dalam kategori ini akan terpengaruh.')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
+                                <button type="button" onclick="konfirmasiHapusKategori('{{ $category->id }}')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
                                     <span class="material-symbols-outlined text-sm">delete</span>
                                 </button>
                             </form>
@@ -188,7 +185,8 @@
     </div>
 </div>
 
-{{-- 7. SCRIPT LIVE PENCARIAN REAL-TIME --}}
+{{-- 7. SCRIPT LIVE PENCARIAN + KONFIRMASI HAPUS (SweetAlert2) --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('categorySearchInput').addEventListener('keyup', function() {
         let filter = this.value.toLowerCase();
@@ -203,5 +201,30 @@
             }
         });
     });
+
+    function konfirmasiHapusKategori(id) {
+        Swal.mixin({
+            customClass: {
+                popup: 'rounded-2xl shadow-xl',
+                title: 'text-lg font-bold',
+                confirmButton: 'px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors bg-red-500 hover:bg-red-600 text-white',
+                cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors',
+                icon: 'border-red-500 text-red-500'
+            },
+            buttonsStyling: false
+        }).fire({
+            title: 'Hapus Kategori?',
+            text: "Semua produk di dalam kategori ini akan terpengaruh.",
+            icon: 'error',
+            width: '320px',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-category-form-' + id).submit();
+            }
+        });
+    }
 </script>
 @endsection

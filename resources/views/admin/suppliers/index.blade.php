@@ -121,10 +121,11 @@
                             <button type="button" data-modal-target="edit-supplier-modal-{{ $supplier->id }}" data-modal-toggle="edit-supplier-modal-{{ $supplier->id }}" class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50">
                                 <span class="material-symbols-outlined text-sm">edit</span>
                             </button>
-                            <form action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST" class="inline">
+                            {{-- 🆕 Form hapus tersembunyi + tombol trigger SweetAlert2 --}}
+                            <form id="delete-supplier-form-{{ $supplier->id }}" action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Hapus supplier ini? Semua produk yang terhubung mungkin akan terpengaruh.')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
+                                <button type="button" onclick="konfirmasiHapusSupplier('{{ $supplier->id }}')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
                                     <span class="material-symbols-outlined text-sm">delete</span>
                                 </button>
                             </form>
@@ -224,7 +225,8 @@
 </div>
 @endif
 
-{{-- 7. SCRIPT LIVE PENCARIAN --}}
+{{-- 7. SCRIPT LIVE PENCARIAN + KONFIRMASI HAPUS (SweetAlert2) --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('supplierSearchInput').addEventListener('keyup', function() {
         let filter = this.value.toLowerCase();
@@ -234,5 +236,30 @@
             row.style.display = text.includes(filter) ? '' : 'none';
         });
     });
+
+    function konfirmasiHapusSupplier(id) {
+        Swal.mixin({
+            customClass: {
+                popup: 'rounded-2xl shadow-xl',
+                title: 'text-lg font-bold',
+                confirmButton: 'px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors bg-red-500 hover:bg-red-600 text-white',
+                cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors',
+                icon: 'border-red-500 text-red-500'
+            },
+            buttonsStyling: false
+        }).fire({
+            title: 'Hapus Supplier?',
+            text: "Semua produk yang terhubung mungkin akan terpengaruh.",
+            icon: 'error',
+            width: '320px',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-supplier-form-' + id).submit();
+            }
+        });
+    }
 </script>
 @endsection
