@@ -105,7 +105,7 @@
                                 </div>
                                 <div class="space-y-0.5">
                                     <span class="block font-bold text-gray-900 dark:text-white text-sm target-user-name">{{ $act->user->name ?? 'Sistem Otomatis' }}</span>
-                                    <span class="block text-[10px] text-gray-400 dark:text-gray-500 font-mono">UID-{{ $act->user_id ?? '00' }}</span>
+                                    <span class="block text-[10px] text-gray-400 dark:text-gray-500 font-mono">UID-{{ $act->user->id ?? '00' }}</span>
                                 </div>
                             </div>
                         </td>
@@ -122,9 +122,26 @@
                                     @else
                                         <span class="text-[10px] font-bold text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2 py-1 rounded-md border border-red-100 dark:border-red-900/50">[KELUAR]</span>
                                     @endif
+
+                                    @if($act->action === 'pengajuan')
+                                        <span class="text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md border border-blue-100 dark:border-blue-900/50">PENGAJUAN</span>
+                                    @elseif($act->action === 'konfirmasi')
+                                        <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-900/50">KONFIRMASI</span>
+                                    @else
+                                        <span class="text-[10px] font-bold text-gray-700 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700">DITOLAK</span>
+                                    @endif
+
                                     <span class="font-bold text-gray-900 dark:text-white text-sm target-product-name">{{ $act->product->name ?? 'Produk Terhapus' }}</span>
                                 </div>
-                                <span class="text-xs font-normal text-gray-400 dark:text-gray-500">Mengajukan mutasi pencatatan fisik komoditas gudang.</span>
+                                <span class="text-xs font-normal text-gray-400 dark:text-gray-500">
+                                    @if($act->action === 'pengajuan')
+                                        Mengajukan transaksi mutasi {{ $act->type === 'in' ? 'barang masuk' : 'barang keluar' }}.
+                                    @elseif($act->action === 'konfirmasi')
+                                        Mengonfirmasi dan memvalidasi mutasi fisik komoditas gudang.
+                                    @else
+                                        Menolak pengajuan transaksi mutasi komoditas gudang.
+                                    @endif
+                                </span>
                             </div>
                         </td>
                         <td class="px-6 py-5 whitespace-nowrap text-right">

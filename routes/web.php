@@ -76,6 +76,10 @@ Route::middleware(['auth', CheckRole::class . ':Admin,Manajer Gudang,Staff Gudan
     
     Route::post('/transactions/{id}/konfirmasi', [StockTransactionController::class, 'konfirmasi'])->name('transactions.konfirmasi');
     Route::post('/transactions/{id}/tolak', [StockTransactionController::class, 'tolak'])->name('transactions.tolak');
+    
+    Route::post('/products/{product}/kirim-tugas-restock', [StockTransactionController::class, 'kirimTugasRestock'])->name('products.kirim-restock');
+    Route::get('/barang-masuk/restock/{product}', [StockTransactionController::class, 'restockForm'])->name('barang.masuk.restock.form');
+    Route::post('/barang-masuk/restock', [StockTransactionController::class, 'restockStore'])->name('barang.masuk.restock.store');
 });
 
 // ==========================================

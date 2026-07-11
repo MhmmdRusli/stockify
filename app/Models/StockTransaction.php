@@ -18,7 +18,8 @@ class StockTransaction extends Model
         'quantity', 
         'date', 
         'status', 
-        'notes'
+        'notes',
+        'approved_by', // 🆕 WAJIB ditambahkan, tanpa ini update() akan diabaikan diam-diam
     ];
 
     public function product()
@@ -29,5 +30,10 @@ class StockTransaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'approved_by');
     }
 }

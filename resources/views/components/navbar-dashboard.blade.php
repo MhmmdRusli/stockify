@@ -1,5 +1,5 @@
 <x-sidebar-dashboard>
-    <x-sidebar-menu-dashboard routeName="index-practice" title="Index"/>
+    <x-sidebar-menu-dashboard/>
 </x-sidebar-dashboard>
 
 <nav class="fixed z-50 w-full bg-white border-b border-gray-200 dark:bg-[#0C1220] dark:border-gray-800">
@@ -54,46 +54,93 @@
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
         </button>
 
-        <button type="button" data-dropdown-toggle="notification-dropdown" class="relative p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
-          <span class="sr-only">View notifications</span>
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white dark:ring-[#0C1220]"></span>
-        </button>
+        
 
-        <div class="z-50 hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded-xl shadow-lg border border-gray-100 dark:divide-gray-700 dark:bg-[#111826] dark:border-gray-700" id="notification-dropdown">
-          <div class="rak-tag block px-4 py-2.5 text-[11px] font-semibold text-center text-amber-500 uppercase bg-gray-50 dark:bg-[#0C1220] tracking-wider">
-            Notifikasi
-          </div>
-          <div>
+        {{-- GANTI seluruh <div id="notification-dropdown">...</div> yang lama dengan blok ini --}}
+
+@php
+    $userRole = strtolower(Auth::user()->role ?? '');
+    $showRealNotifications = in_array($userRole, ['staff gudang', 'manajer gudang']);
+    $userNotifications = $showRealNotifications ? Auth::user()->notifications->take(6) : collect();
+    $unreadCount = $showRealNotifications ? Auth::user()->unreadNotifications->count() : 0;
+@endphp
+
+<button type="button" data-dropdown-toggle="notification-dropdown" class="relative p-2 text-gray-500 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800">
+    <span class="sr-only">View notifications</span>
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+    @if(!$showRealNotifications || $unreadCount > 0)
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 {{ $showRealNotifications ? 'bg-rose-500' : 'bg-amber-500' }} rounded-full ring-2 ring-white dark:ring-[#0C1220]"></span>
+    @endif
+</button>
+
+<div class="z-50 hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded-xl shadow-lg border border-gray-100 dark:divide-gray-700 dark:bg-[#111826] dark:border-gray-700" id="notification-dropdown">
+    <div class="rak-tag block px-4 py-2.5 text-[11px] font-semibold text-center text-amber-500 uppercase bg-gray-50 dark:bg-[#0C1220] tracking-wider">
+        Notifikasi
+    </div>
+
+    @if($showRealNotifications)
+        {{-- STAFF GUDANG & MANAJER GUDANG: notifikasi asli dari database, otomatis kosong setelah dikonfirmasi/ditolak --}}
+        <div>
+            @forelse($userNotifications as $notif)
+                @php
+                    $notifType = $notif->data['type'] ?? null;
+                    if ($notifType === 'restock_task') {
+                        $link = url('/barang-masuk/restock/' . ($notif->data['product_id'] ?? ''));
+                    } else {
+                        $link = $notif->data['url'] ?? '#';
+                    }
+                    $isOut = ($notif->data['transaction_type'] ?? null) === 'out';
+                @endphp
+                <a href="{{ $link }}?notification_id={{ $notif->id }}"
+                   class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700 {{ is_null($notif->read_at) ? 'bg-teal-50/40 dark:bg-teal-950/10' : '' }}">
+                    <div class="flex-shrink-0">
+                        <span class="flex items-center justify-center w-10 h-10 rounded-full {{ $isOut ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        </span>
+                    </div>
+                    <div class="w-full pl-3">
+                        <div class="text-gray-600 font-normal text-sm mb-1 dark:text-gray-300">{{ $notif->data['message'] ?? 'Notifikasi baru' }}</div>
+                        <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">{{ $notif->created_at->diffForHumans() }}</div>
+                    </div>
+                </a>
+            @empty
+                <div class="px-4 py-6 text-center text-xs text-gray-400 dark:text-gray-500">Belum ada notifikasi baru.</div>
+            @endforelse
+        </div>
+    @else
+        {{-- ADMIN: tampilan generik/ringkasan, tidak actionable karena Admin bukan pelaku transaksi --}}
+        <div>
             <a href="{{ url('/barang-masuk') }}" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
-              <div class="flex-shrink-0">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                </span>
-              </div>
-              <div class="w-full pl-3">
-                <div class="text-gray-600 font-normal text-sm mb-1 dark:text-gray-300">Barang masuk baru menunggu <span class="font-semibold text-gray-900 dark:text-white">konfirmasi</span></div>
-                <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">beberapa saat lalu</div>
-              </div>
+                <div class="flex-shrink-0">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </span>
+                </div>
+                <div class="w-full pl-3">
+                    <div class="text-gray-600 font-normal text-sm mb-1 dark:text-gray-300">Barang masuk baru menunggu <span class="font-semibold text-gray-900 dark:text-white">konfirmasi</span></div>
+                    <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">beberapa saat lalu</div>
+                </div>
             </a>
             <a href="{{ url('/products') }}" class="flex px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
-              <div class="flex-shrink-0">
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                </span>
-              </div>
-              <div class="w-full pl-3">
-                <div class="text-gray-600 font-normal text-sm mb-1 dark:text-gray-300">Stok <span class="font-semibold text-gray-900 dark:text-white">3 produk</span> berada di bawah ambang minimum</div>
-                <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">10 menit lalu</div>
-              </div>
+                <div class="flex-shrink-0">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    </span>
+                </div>
+                <div class="w-full pl-3">
+                    <div class="text-gray-600 font-normal text-sm mb-1 dark:text-gray-300">Stok <span class="font-semibold text-gray-900 dark:text-white">3 produk</span> berada di bawah ambang minimum</div>
+                    <div class="rak-tag text-[10px] font-medium text-amber-600 dark:text-amber-400">10 menit lalu</div>
+                </div>
             </a>
-          </div>
-          <a href="{{ url('/report/transactions') }}" class="block py-2.5 rak-tag text-sm font-medium text-center text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-[#0C1220] dark:text-gray-300 dark:hover:bg-gray-800">
-            <div class="inline-flex items-center">
-              Lihat semua
-            </div>
-          </a>
         </div>
+    @endif
+
+    <a href="{{ url('/report/transactions') }}" class="block py-2.5 rak-tag text-sm font-medium text-center text-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-[#0C1220] dark:text-gray-300 dark:hover:bg-gray-800">
+        <div class="inline-flex items-center">
+            Lihat semua
+        </div>
+    </a>
+</div>
 
         <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="text-gray-500 dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
           <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
