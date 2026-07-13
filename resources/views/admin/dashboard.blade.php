@@ -5,7 +5,7 @@
 <style>
     .rak-ticket {
         position: relative;
-        border-left: 3px solid rgba(245,166,35,0.45);
+        border-left: 3px solid rgba(245,166,35,0.35);
     }
     .rak-tag {
         letter-spacing: 0.03em;
@@ -41,45 +41,45 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
     {{-- KARTU 1: TOTAL PRODUK --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1">
-        <span class="rak-tag absolute top-0 right-0 bg-[#101826] text-amber-400 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">RAK-01</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5">
+        <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">RAK-01</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Total Jenis Produk</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
                 {{ number_format($totalProducts, 0, ',', '.') }}
                 <span class="text-sm font-medium text-gray-400 align-middle">SKU</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-[#1E293B] to-[#101826] text-amber-400 shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
             </div>
         </div>
     </div>
 
     {{-- KARTU 2: STOK MASUK --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1" style="border-left-color: rgba(20,184,166,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">MASUK</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(20,184,166,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">MASUK</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Akumulasi Stok Masuk</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-teal-600 dark:text-teal-400 tracking-tight">
                 +{{ number_format($totalFormatIn, 0, ',', '.') }}
                 <span class="text-sm font-medium text-gray-400 align-middle">Pcs</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             </div>
         </div>
     </div>
 
     {{-- KARTU 3: STOK KELUAR --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1" style="border-left-color: rgba(244,63,94,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-rose-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">KELUAR</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(244,63,94,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">KELUAR</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Akumulasi Stok Keluar</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-rose-600 dark:text-rose-400 tracking-tight">
                 -{{ number_format($totalFormatOut, 0, ',', '.') }}
                 <span class="text-sm font-medium text-gray-400 align-middle">Pcs</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"></path></svg>
             </div>
         </div>
@@ -103,7 +103,7 @@
             style="min-height: 280px; width: 100%;"></div>
         </div>
 
-        <div class="barcode-strip flex items-center gap-[2px] mt-4 opacity-40 text-gray-400 dark:text-gray-600">
+        <div class="barcode-strip flex items-center gap-[2px] mt-4 opacity-30 text-gray-400 dark:text-gray-600">
             @for ($i = 0; $i < 60; $i++)
                 <span style="height: {{ rand(4,12) }}px;"></span>
             @endfor
@@ -111,8 +111,8 @@
     </div>
 
     {{-- 🆕 AKTIVITAS PENGGUNA TERBARU (menggantikan Monitoring Batas Stok) --}}
-    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(99,102,241,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">LOG-USER</span>
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(99,102,241,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-indigo-50 text-indigo-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-indigo-950/30 dark:text-indigo-300">LOG-USER</span>
         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Aktivitas Pengguna Terbaru</h3>
         <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Riwayat transaksi stok terbaru oleh seluruh staff</p>
         <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -157,45 +157,45 @@
 @if(Auth::user()->role === 'Manajer Gudang')
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
     {{-- KARTU 1: STOK MENIPIS --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1" style="border-left-color: rgba(245,166,35,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-[#101826] text-amber-400 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">MENIPIS</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(245,166,35,0.4)">
+        <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">MENIPIS</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Stok Menipis</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-amber-500 dark:text-amber-400 tracking-tight">
                 {{ $lowStockProducts->count() }}
                 <span class="text-sm font-medium text-gray-400 align-middle">Item</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
             </div>
         </div>
     </div>
 
     {{-- KARTU 2: BARANG MASUK HARI INI --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1" style="border-left-color: rgba(20,184,166,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">IN-01</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(20,184,166,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">IN-01</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Barang Masuk Hari Ini</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-teal-600 dark:text-teal-400 tracking-tight">
                 +{{ number_format($masukHariIni, 0, ',', '.') }}
                 <span class="text-sm font-medium text-gray-400 align-middle">Pcs</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-950/30 dark:text-teal-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             </div>
         </div>
     </div>
 
     {{-- KARTU 3: BARANG KELUAR HARI INI --}}
-    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-1" style="border-left-color: rgba(244,63,94,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-rose-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">OUT-01</span>
+    <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(244,63,94,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">OUT-01</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Barang Keluar Hari Ini</p>
         <div class="flex items-end justify-between">
             <h3 class="text-4xl font-bold text-rose-600 dark:text-rose-400 tracking-tight">
                 -{{ number_format($keluarHariIni, 0, ',', '.') }}
                 <span class="text-sm font-medium text-gray-400 align-middle">Pcs</span>
             </h3>
-            <div class="p-3 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+            <div class="p-3 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 group-hover:scale-105 transition-transform duration-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
             </div>
         </div>
@@ -203,19 +203,19 @@
 </div>
 
 {{-- DAFTAR PRODUK STOK MENIPIS (pelengkap kartu di atas) --}}
-<div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden mt-5" style="border-left-color: rgba(245,166,35,0.5)">
-    <span class="rak-tag absolute top-0 right-0 bg-[#101826] text-amber-400 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">MIN-STOK</span>
+<div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden mt-5" style="border-left-color: rgba(245,166,35,0.4)">
+    <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">MIN-STOK</span>
     <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Monitoring Batas Stok Terbaru</h3>
     <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Produk mendekati batas minimum, perlu tindakan restock</p>
     <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
         @forelse($lowStockProducts as $product)
         <div class="flex items-center gap-3 py-2.5 px-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors duration-150">
-            <span class="flex-shrink-0 w-1.5 h-8 rounded-full bg-gradient-to-b from-orange-400 to-orange-500"></span>
+            <span class="flex-shrink-0 w-1.5 h-8 rounded-full bg-orange-300"></span>
             <div class="flex-1 min-w-0">
                 <p class="rak-tag text-xs font-bold text-gray-800 dark:text-white">{{ $product->sku ?? '-' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[160px]">{{ $product->name }}</p>
             </div>
-            <span class="rak-tag flex-shrink-0 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-bold px-2.5 py-1 rounded-full ring-1 ring-orange-200 dark:ring-orange-800">{{ $product->minimum_stock }} Pcs</span>
+            <span class="rak-tag flex-shrink-0 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-bold px-2.5 py-1 rounded-full ring-1 ring-orange-100 dark:ring-orange-800">{{ $product->minimum_stock }} Pcs</span>
         </div>
         @empty
         <div class="p-6 text-center text-xs text-gray-400">Stok gudang aman terkendali.</div>
@@ -235,10 +235,10 @@
 @endphp
 
 @if($restockTasks->count() > 0)
-<div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 relative overflow-hidden mt-4" style="border-left-color: rgba(244,63,94,0.5)">
-    <span class="rak-tag absolute top-0 right-0 bg-rose-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">TASK-RESTOCK</span>
+<div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 relative overflow-hidden mt-4" style="border-left-color: rgba(244,63,94,0.35)">
+    <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">TASK-RESTOCK</span>
     <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight">
-        <span class="w-2 h-2 bg-rose-500 rounded-full ring-4 ring-rose-100 dark:ring-rose-900/40 animate-pulse"></span>
+        <span class="w-2 h-2 bg-rose-400 rounded-full ring-4 ring-rose-100 dark:ring-rose-900/40"></span>
         Tugas Restock Masuk
         <span class="rak-tag text-[10px] bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 px-2 py-0.5 rounded-full font-bold">{{ $restockTasks->count() }} BARU</span>
     </h3>
@@ -246,7 +246,7 @@
     <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
         @foreach($restockTasks as $notif)
         <div class="flex items-center gap-3 py-3 px-1">
-            <span class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-[#1E293B] to-[#101826] text-amber-400 flex items-center justify-center">
+            <span class="flex-shrink-0 w-10 h-10 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">local_shipping</span>
             </span>
             <div class="flex-1 min-w-0">
@@ -254,7 +254,7 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400">Diminta oleh {{ $notif->data['requested_by'] }} &middot; <span class="rak-tag">{{ $notif->created_at->diffForHumans() }}</span></p>
             </div>
             <a href="{{ url('/barang-masuk/restock/' . $notif->data['product_id']) }}?notification_id={{ $notif->id }}"
-               class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-[#1E293B] to-[#101826] text-amber-400 font-semibold rounded-xl text-xs shadow-sm hover:shadow-md transition-all duration-300">
+               class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl text-xs shadow-sm transition-colors duration-200">
                 Isi Draf
             </a>
         </div>
@@ -263,10 +263,10 @@
 </div>
 @endif
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(20,184,166,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-teal-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">TASK-IN</span>
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(20,184,166,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">TASK-IN</span>
         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight">
-            <span class="w-2 h-2 bg-emerald-500 rounded-full ring-4 ring-emerald-100 dark:ring-emerald-900/40"></span>
+            <span class="w-2 h-2 bg-emerald-400 rounded-full ring-4 ring-emerald-100 dark:ring-emerald-900/40"></span>
             Periksa Barang Masuk Baru
         </h3>
         <div class="overflow-x-auto -mx-1">
@@ -304,10 +304,10 @@
         </div>
     </div>
 
-    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(244,63,94,0.5)">
-        <span class="rak-tag absolute top-0 right-0 bg-rose-600 text-white text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg">TASK-OUT</span>
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(244,63,94,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">TASK-OUT</span>
         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 tracking-tight">
-            <span class="w-2 h-2 bg-rose-500 rounded-full ring-4 ring-rose-100 dark:ring-rose-900/40"></span>
+            <span class="w-2 h-2 bg-rose-400 rounded-full ring-4 ring-rose-100 dark:ring-rose-900/40"></span>
             Siapkan Barang Keluar
         </h3>
         <div class="overflow-x-auto -mx-1">
@@ -390,8 +390,8 @@
                 },
                 stroke: { width: [3, 0, 0], curve: 'smooth' },
                 plotOptions: { bar: { columnWidth: '35%', borderRadius: 4 } },
-                colors: ['#f5a623', '#14b8a6', '#f43f5e'],
-                fill: { opacity: [1, 0.85, 0.85] },
+                colors: ['#d97706', '#2dd4bf', '#fb7185'],
+                fill: { opacity: [1, 0.7, 0.7] },
                 labels: labels,
                 markers: { size: [4, 0, 0] },
                 xaxis: {

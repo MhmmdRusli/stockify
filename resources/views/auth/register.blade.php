@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Admin - RusellStockify</title>
+    <title>Register Admin - Stockify</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -21,7 +21,7 @@
 
                     {{-- Header --}}
                     <div class="relative z-10">
-                        <h2 class="text-3xl font-black tracking-tight leading-tight">Rusell<span class="text-amber-500">Stockify</span></h2>
+                        <h2 class="text-3xl font-black tracking-tight leading-tight"><span class="text-amber-500">Stockify</span></h2>
                         <p class="text-sm font-medium text-gray-400 mt-2 border-l-2 border-amber-500 pl-3">Registrasi Admin Baru</p>
                     </div>
 
@@ -49,7 +49,7 @@
                     <div class="relative z-10 pt-8 border-t border-white/10">
                         <div class="text-center">
                             <p class="text-[10px] uppercase tracking-widest text-gray-500">Bergabunglah dengan ekosistem</p>
-                            <p class="text-sm font-bold mt-1 text-amber-500">RusellStockify Professional</p>
+                            <p class="text-sm font-bold mt-1 text-amber-500">Stockify Professional</p>
                         </div>
                     </div>
                 </div>

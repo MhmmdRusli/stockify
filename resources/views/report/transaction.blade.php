@@ -4,7 +4,7 @@
 <div class="p-6 space-y-6 bg-gray-50/50 dark:bg-gray-950 min-h-screen id-to-print">
 
     {{-- 1. HEADER HALAMAN --}}
-    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:border-none print:shadow-none print:p-0">
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 print:border-none print:shadow-none print:p-0">
         <div class="text-left">
             <h1 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 print:text-black">
                 <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl print:hidden">swap_horizontal_circle</span>
@@ -12,12 +12,21 @@
             </h1>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Sistem rekam log mutasi, penyesuaian kuantitas stok, dan status validasi SOP gudang.</p>
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400 font-semibold bg-gray-50 dark:bg-gray-700/50 px-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-700 shrink-0 print:bg-white print:text-black print:p-0 print:border-none">
-            Zona Waktu: <span class="text-gray-800 dark:text-gray-200 font-bold print:text-black">WIB (Jakarta)</span>
+        
+        {{-- POSISINYA DI SINI: Tombol Aksi & Informasi Zona Waktu --}}
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <button onclick="exportToExcel()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
+                <span class="material-symbols-outlined text-sm">download_for_offline</span>
+                Unduh Excel
+            </button>
+            <button onclick="window.print()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
+                <span class="material-symbols-outlined text-sm">print</span>
+                Cetak PDF
+            </button>
         </div>
     </div>
 
-    {{-- 2. KARTU METRIK RINGKASAN (Berubah Jadi Bentuk Kubus / Kotak Simetris Saat Di-Cetak) --}}
+    {{-- 2. KARTU METRIK RINGKASAN --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 print:grid-cols-4 print:gap-2">
         <div class="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xs flex items-center justify-between print:border-gray-300 print:p-4 print:text-black print:bg-white">
             <div class="space-y-1">
@@ -55,16 +64,6 @@
                 <span class="material-symbols-outlined text-xl">hourglass_empty</span>
             </div>
         </div>
-    </div>
-
-    {{-- TOOLBAR AKSI EKSPOR (Otomatis Hilang Saat Print PDF) --}}
-    <div class="flex justify-end gap-3 print:hidden">
-        <button onclick="window.print()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
-            <span class="material-symbols-outlined text-sm">print</span> CETAK PDF
-        </button>
-        <button onclick="exportToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
-            <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
-        </button>
     </div>
 
     {{-- 3. TABEL + TOOLBAR --}}

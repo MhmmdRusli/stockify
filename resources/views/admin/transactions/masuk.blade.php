@@ -11,13 +11,13 @@
         </div>
         <div class="shrink-0 flex items-center gap-2 w-full sm:w-auto">
             @if(strtolower(auth()->user()->role) !== 'staff gudang')
-                <button type="button" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
+                <button type="button" onclick="exportBarangMasukToExcel()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                     <span class="material-symbols-outlined text-sm">download</span>
                     Export Report
                 </button>
             @endif
 
-            {{-- BUTTON KHUSUS STAFF GUDANG (WARNA AMBER SEARAH DENGAN MANAGERS & FORMS) --}}
+            {{-- BUTTON KHUSUS STAFF GUDANG --}}
             @if(strtolower(auth()->user()->role) === 'staff gudang')
                 <button type="button" onclick="openModalForStaff()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-white bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                     <span class="material-symbols-outlined text-sm font-bold">assignment_add</span>
@@ -88,86 +88,89 @@
 
     {{-- 4. KONTEN TABEL DATA TRANSAKSI --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 text-left">
-                <thead class="bg-gray-50/75 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 font-bold uppercase text-[11px] tracking-wider border-b border-gray-100 dark:border-gray-700">
+        {{-- overflow-x-auto dihapus agar tabel dipaksa masuk layar penuh tanpa scroll horizontal --}}
+        <div class="w-full">
+            <table id="barangMasukTable" class="w-full divide-y divide-gray-100 dark:divide-gray-700 text-left table-fixed">
+                <thead class="bg-gray-50/75 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 font-bold uppercase text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700">
                     <tr>
-                        <th class="px-6 py-4">Waktu Masuk</th>
-                        <th class="px-6 py-4">ID Transaksi</th>
-                        <th class="px-6 py-4">Nama Produk</th>
-                        <th class="px-6 py-4">SKU</th>
-                        <th class="px-6 py-4 text-center">Tipe</th>
-                        <th class="px-6 py-4 text-right">Jumlah</th>
-                        <th class="px-6 py-4">Keterangan / Supplier</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-right pr-10">Aksi SOP</th>
+                        <th class="px-3 py-4 w-[12%]">Waktu</th>
+                        <th class="px-3 py-4 w-[11%]">ID Transaksi</th>
+                        <th class="px-3 py-4 w-[15%]">Nama Produk</th>
+                        <th class="px-3 py-4 w-[10%]">SKU</th>
+                        <th class="px-2 py-4 w-[9%] text-center">Tipe</th>
+                        <th class="px-2 py-4 w-[7%] text-right">Jumlah</th>
+                        <th class="px-3 py-4 w-[16%]">Keterangan</th>
+                        <th class="px-2 py-4 w-[10%] text-center">Status</th>
+                        {{-- Lebar kolom aksi disesuaikan agar tombol muat berdampingan --}}
+                        <th class="px-3 py-4 w-[10%] text-center">Aksi SOP</th>
                     </tr>
                 </thead>
                 <tbody id="transaction-table" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @forelse($transactions as $item)
                     <tr class="hover:bg-gray-50/40 dark:hover:bg-gray-700/20 transition-colors">
-                        <td class="px-6 py-5 whitespace-nowrap">
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($item->date)->format('M d, Y') }}</p>
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $item->created_at->format('H:i A') }}</p>
+                        <td class="px-3 py-4">
+                            <p class="text-xs font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($item->date)->format('M d, Y') }}</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $item->created_at->format('H:i A') }}</p>
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">
+                        <td class="px-3 py-4 text-[11px] font-bold text-blue-600 dark:text-blue-400 font-mono truncate">
                             #IN-{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}
                         </td>
-                        <td class="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">
+                        <td class="px-3 py-4 text-xs font-bold text-gray-900 dark:text-white truncate" title="{{ $item->product->name ?? 'Produk Terhapus' }}">
                             {{ $item->product->name ?? 'Produk Terhapus' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-xs font-mono text-gray-400 dark:text-gray-500">
+                        <td class="px-3 py-4 text-[11px] font-mono text-gray-400 dark:text-gray-500 truncate">
                             {{ $item->product->sku ?? '-' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-wider dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50">
-                                <span class="material-symbols-outlined text-xs">arrow_downward</span> Masuk
+                        <td class="px-2 py-4 text-center">
+                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-bold uppercase dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50">
+                                <span class="material-symbols-outlined text-[10px]">arrow_downward</span> Masuk
                             </span>
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-right font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                            +{{ $item->quantity }}
+                        <td class="px-2 py-4 text-right font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                            +{{ number_format($item->quantity, 0, ',', '.') }}
                         </td>
-                        <td class="px-6 py-5 text-sm text-gray-500 dark:text-gray-400 truncate max-w-[180px]">
+                        <td class="px-3 py-4 text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $item->notes ?? 'Tidak ada catatan' }}">
                             {{ $item->notes ?? 'Tidak ada catatan' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-center">
+                        <td class="px-2 py-4 text-center">
                             @if($item->status === 'Pending')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+                                    <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span> Pending
                                 </span>
                             @elseif($item->status === 'Diterima' || $item->status === 'Dikeluarkan')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Selesai
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                    <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Selesai
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Ditolak
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-400">
+                                    <span class="w-1 h-1 rounded-full bg-red-500"></span> Ditolak
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-right pr-8">
-                            <div class="flex items-center justify-end gap-1.5">
-                                <button type="button" data-modal-target="detail-masuk-modal-{{ $item->id }}" data-modal-toggle="detail-masuk-modal-{{ $item->id }}" class="p-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-xl transition-colors border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50" title="Lihat Detail">
-                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                        {{-- Kolom Aksi SOP: Flexbox diganti inline-flex agar tetap satu baris rapi dan tidak melar --}}
+                        <td class="px-3 py-4 text-center">
+                            <div class="inline-flex items-center justify-center gap-1">
+                                <button type="button" data-modal-target="detail-masuk-modal-{{ $item->id }}" data-modal-toggle="detail-masuk-modal-{{ $item->id }}" class="p-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50 cursor-pointer shadow-3xs" title="Lihat Detail">
+                                    <span class="material-symbols-outlined text-base">visibility</span>
                                 </button>
         
                                 @if($item->status === 'Pending')
                                     @if(strtolower(auth()->user()->role) === 'manajer gudang')
                                         <button type="button" 
                                             onclick="konfirmasiAksi('{{ route('transactions.konfirmasi', $item->id) }}', 'Setujui')" 
-                                            class="px-3 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-semibold rounded-xl text-[11px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors">
-                                            Setujui
+                                            class="px-2 py-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-bold rounded-lg text-[10px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors cursor-pointer shadow-3xs">
+                                            Acc
                                         </button>
                                         <button type="button" 
                                             onclick="konfirmasiAksi('{{ route('transactions.tolak', $item->id) }}', 'Tolak')" 
-                                            class="px-3 py-2 text-red-700 bg-red-50 hover:bg-red-100/80 font-semibold rounded-xl text-[11px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors">
+                                            class="px-2 py-1.5 text-red-700 bg-red-50 hover:bg-red-100/80 font-bold rounded-lg text-[10px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors cursor-pointer shadow-3xs">
                                             Tolak
                                         </button>
                                     @else
-                                        <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Menunggu verifikasi Manajer</span>
+                                        <span class="text-gray-400 dark:text-gray-500 italic text-[9px] leading-tight block">Wait Mgr</span>
                                     @endif
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Sudah diproses</span>
+                                    <span class="text-gray-400 dark:text-gray-500 text-[9px]">Done</span>
                                 @endif
                             </div>
                         </td>
@@ -291,6 +294,23 @@
 <script>
 let isQuickProductActive = false;
 
+// Real-time local search filter script
+document.getElementById('table-search')?.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#transaction-table tr');
+    
+    rows.forEach(row => {
+        if(row.cells.length > 1) { 
+            const textContent = row.textContent.toLowerCase();
+            if(textContent.includes(query)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        }
+    });
+});
+
 function checkNewCategoryOption(selectElement) {
     const wrapperNewCat = document.getElementById('wrapperNewCategoryInput');
     const inputNewCatName = document.getElementById('modalNewCategoryName');
@@ -384,14 +404,26 @@ function toggleQuickProductForm() {
     }
 }
 
+function exportBarangMasukToExcel() {
+    const table = document.getElementById("barangMasukTable");
+    const blob = new Blob(['\ufeff' + table.outerHTML], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Laporan_Barang_Masuk_" + new Date().toISOString().slice(0,10) + ".xls";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
 function konfirmasiAksi(url, tipe) {
     let buttonColorClass = tipe === 'Setujui' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white';
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
             popup: 'rounded-2xl shadow-xl',
             title: 'text-lg font-bold',
-            confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 ${buttonColorClass}`,
-            cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700'
+            confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 ${buttonColorClass} cursor-pointer`,
+            cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 cursor-pointer'
         },
         buttonsStyling: false 
     });

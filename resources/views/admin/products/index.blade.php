@@ -247,11 +247,12 @@
                                             </button>
                                         </form>
                                         @if (strtolower(Auth::user()->role) === 'manajer gudang' && $product->stock < $product->minimum_stock)
-                                            <form action="{{ route('products.kirim-restock', $product->id) }}"
-                                                method="POST" class="inline"
-                                                onsubmit="return confirm('Kirim tugas restock untuk {{ $product->name }} ke Staff Gudang?')">
+                                            <form id="restock-form-{{ $product->id }}"
+                                                action="{{ route('products.kirim-restock', $product->id) }}"
+                                                method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit"
+                                                <button type="button"
+                                                    onclick="konfirmasiRestock('{{ $product->id }}', '{{ $product->name }}')"
                                                     class="p-2 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/50"
                                                     title="Kirim Tugas Restock">
                                                     <span class="material-symbols-outlined text-sm">local_shipping</span>
@@ -537,6 +538,36 @@
     {{-- 8. SCRIPT LIVE PENCARIAN --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function konfirmasiRestock(id, productName) {
+            Swal.mixin({
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl',
+                    title: 'text-lg font-bold',
+                    confirmButton: 'px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors bg-amber-500 hover:bg-amber-600 text-white',
+                    cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors',
+                    icon: 'border-amber-500 text-amber-500'
+                },
+                buttonsStyling: false
+            }).fire({
+                title: 'Kirim Tugas Restock?',
+                text: `Tugas restock untuk "${productName}" akan dikirim ke Staff Gudang.`,
+                icon: 'question',
+                width: '340px',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Kirim',
+                cancelButtonText: 'Batal',
+                didOpen: (popup) => {
+                    const icon = popup.querySelector('.swal2-question');
+                    if (icon) icon.style.color = '#f59e0b';
+                    if (icon) icon.style.borderColor = '#f59e0b';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('restock-form-' + id).submit();
+                }
+            });
+        }
+
         function konfirmasiHapus(id) {
             Swal.mixin({
                 customClass: {

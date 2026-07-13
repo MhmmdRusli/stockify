@@ -12,11 +12,16 @@
             </h1>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Daftar rekam jejak aksi mutasi barang masuk dan keluar yang dilakukan oleh staf gudang secara real-time.</p>
         </div>
-        <div class="relative w-full md:w-80 shrink-0">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400 dark:text-gray-500">
-                <span class="material-symbols-outlined text-lg">search</span>
-            </span>
-            <input type="text" id="robustSearchInput" placeholder="Cari staf, role, atau nama produk..." class="w-full pl-11 pr-4 py-2.5 text-xs font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400">
+        
+        {{-- DI ATAS: Tombol Cetak & Excel --}}
+        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <a href="{{ route('report.user_activity.print') }}" target="_blank"
+               class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
+                <span class="material-symbols-outlined text-sm">print</span> CETAK PDF
+            </a>
+            <button onclick="exportAuditToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
+                <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
+            </button>
         </div>
     </div>
 
@@ -60,15 +65,14 @@
         </div>
     </div>
 
-    {{-- ACTION BUTTONS --}}
-    <div class="flex justify-end gap-3">
-        <a href="{{ route('report.user_activity.print') }}" target="_blank"
-           class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
-            <span class="material-symbols-outlined text-sm">print</span> CETAK PDF
-        </a>
-        <button onclick="exportAuditToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
-            <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
-        </button>
+    {{-- DI BAWAH: Search Input (Posisi Kiri & Ukuran Standar md:w-80) --}}
+    <div class="flex justify-start">
+        <div class="relative w-full md:w-80 shrink-0">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400 dark:text-gray-500">
+                <span class="material-symbols-outlined text-lg">search</span>
+            </span>
+            <input type="text" id="robustSearchInput" placeholder="Cari staf, role, atau nama produk..." class="w-full pl-11 pr-4 py-2.5 text-xs font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400 shadow-xs">
+        </div>
     </div>
 
     {{-- 3. TABEL AUDIT --}}
@@ -222,4 +226,4 @@
         document.body.removeChild(a);
     }
 </script>
-@endsection
+@endsection 

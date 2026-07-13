@@ -10,18 +10,13 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola pengeluaran stok barang untuk distribusi toko, pesanan, atau mutasi eksternal.</p>
         </div>
         <div class="shrink-0 flex items-center gap-2 w-full sm:w-auto">
-            {{-- Export Report disembunyikan dari Staff Gudang. Staff hanya bertugas
-                 menyiapkan & mengirimkan barang keluar (Setujui/Tolak), bukan melihat laporan. --}}
             @if(strtolower(auth()->user()->role) !== 'staff gudang')
-                <button type="button" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
+                <button type="button" onclick="exportBarangKeluarToExcel()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-gray-600 bg-white hover:bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                     <span class="material-symbols-outlined text-sm">download</span>
                     Export Report
                 </button>
             @endif
 
-            {{-- Hanya Manajer Gudang yang boleh membuat pengajuan Barang Keluar baru,
-                 sesuai spek "Mengeluarkan barang dan mencatat data pengeluaran".
-                 Admin hanya berhak melihat riwayat/laporan (read-only). --}}
             @if(strtolower(auth()->user()->role) === 'manajer gudang')
                 <button type="button" data-modal-target="add-barang-keluar-modal" data-modal-toggle="add-barang-keluar-modal" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 text-white bg-amber-500 hover:bg-amber-600 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors">
                     <span class="material-symbols-outlined text-sm font-bold">add</span>
@@ -84,96 +79,94 @@
 
     {{-- 4. KONTEN TABEL DATA TRANSAKSI --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700 text-left">
-                <thead class="bg-gray-50/75 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 font-bold uppercase text-[11px] tracking-wider border-b border-gray-100 dark:border-gray-700">
+        {{-- Pembungkus overflow-x-auto dilepas agar pas layar penuh --}}
+        <div class="w-full">
+            <table id="barangKeluarTable" class="w-full divide-y divide-gray-100 dark:divide-gray-700 text-left table-fixed">
+                <thead class="bg-gray-50/75 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 font-bold uppercase text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700">
                     <tr>
-                        <th class="px-6 py-4">Waktu Keluar</th>
-                        <th class="px-6 py-4">ID Transaksi</th>
-                        <th class="px-6 py-4">Nama Produk</th>
-                        <th class="px-6 py-4">SKU</th>
-                        <th class="px-6 py-4 text-center">Tipe</th>
-                        <th class="px-6 py-4 text-right">Jumlah</th>
-                        <th class="px-6 py-4">Keterangan / Tujuan</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-right pr-10">Aksi SOP</th>
+                        <th class="px-3 py-4 w-[12%]">Waktu Keluar</th>
+                        <th class="px-3 py-4 w-[11%]">ID Transaksi</th>
+                        <th class="px-3 py-4 w-[15%]">Nama Produk</th>
+                        <th class="px-3 py-4 w-[10%]">SKU</th>
+                        <th class="px-2 py-4 w-[9%] text-center">Tipe</th>
+                        <th class="px-2 py-4 w-[7%] text-right">Jumlah</th>
+                        <th class="px-3 py-4 w-[16%]">Keterangan / Tujuan</th>
+                        <th class="px-2 py-4 w-[10%] text-center">Status</th>
+                        <th class="px-3 py-4 w-[10%] text-center">Aksi SOP</th>
                     </tr>
                 </thead>
                 <tbody id="transaction-table" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @forelse($transactions as $item)
                     <tr class="hover:bg-gray-50/40 dark:hover:bg-gray-700/20 transition-colors">
-                        <td class="px-6 py-5 whitespace-nowrap">
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($item->date)->format('M d, Y') }}</p>
-                            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $item->created_at->format('H:i A') }}</p>
+                        <td class="px-3 py-4">
+                            <p class="text-xs font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($item->date)->format('M d, Y') }}</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $item->created_at->format('H:i A') }}</p>
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-xs font-bold text-red-600 dark:text-red-400 font-mono">
+                        <td class="px-3 py-4 text-[11px] font-bold text-red-600 dark:text-red-400 font-mono truncate">
                             #OUT-{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}
                         </td>
-                        <td class="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white">
+                        <td class="px-3 py-4 text-xs font-bold text-gray-900 dark:text-white truncate" title="{{ $item->product->name ?? 'Produk Terhapus' }}">
                             {{ $item->product->name ?? 'Produk Terhapus' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-xs font-mono text-gray-400 dark:text-gray-500">
+                        <td class="px-3 py-4 text-[11px] font-mono text-gray-400 dark:text-gray-500 truncate">
                             {{ $item->product->sku ?? '-' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold uppercase tracking-wider dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
-                                <span class="material-symbols-outlined text-xs">arrow_upward</span> Keluar
+                        <td class="px-2 py-4 text-center">
+                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-100 text-[9px] font-bold uppercase dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
+                                <span class="material-symbols-outlined text-[10px]">arrow_upward</span> Keluar
                             </span>
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-right font-bold text-red-600 dark:text-red-400 text-sm">
-                            -{{ $item->quantity }}
+                        <td class="px-2 py-4 text-right font-bold text-red-600 dark:text-red-400 text-xs">
+                            -{{ number_format($item->quantity, 0, ',', '.') }}
                         </td>
-                        <td class="px-6 py-5 text-sm text-gray-500 dark:text-gray-400 truncate max-w-[180px]">
+                        <td class="px-3 py-4 text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $item->notes ?? 'Tidak ada catatan' }}">
                             {{ $item->notes ?? 'Tidak ada catatan' }}
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-center">
+                        <td class="px-2 py-4 text-center">
                             @if($item->status === 'Pending')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+                                    <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span> Pending
                                 </span>
                             @elseif($item->status === 'Dikeluarkan' || $item->status === 'Diterima')
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Selesai
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                    <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Selesai
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-400">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Ditolak
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-400">
+                                    <span class="w-1 h-1 rounded-full bg-red-500"></span> Ditolak
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-5 whitespace-nowrap text-right pr-8">
-                            <div class="flex items-center justify-end gap-1.5">
-                                {{-- 🆕 TOMBOL LIHAT DETAIL: tersedia untuk semua role, buka modal info lengkap --}}
-                                <button type="button" data-modal-target="detail-keluar-modal-{{ $item->id }}" data-modal-toggle="detail-keluar-modal-{{ $item->id }}" class="p-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50" title="Lihat Detail">
-                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                        {{-- Kolom Aksi SOP dikunci dengan inline-flex agar pas sejajar --}}
+                        <td class="px-3 py-4 text-center">
+                            <div class="inline-flex items-center justify-center gap-1">
+                                <button type="button" data-modal-target="detail-keluar-modal-{{ $item->id }}" data-modal-toggle="detail-keluar-modal-{{ $item->id }}" class="p-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50 cursor-pointer shadow-3xs" title="Lihat Detail">
+                                    <span class="material-symbols-outlined text-base">visibility</span>
                                 </button>
 
                                 @if($item->status === 'Pending')
-                                    {{-- Setujui/Tolak khusus Staff Gudang, sesuai spek
-                                         "Menyiapkan dan mengirimkan barang keluar". Admin & Manajer
-                                         Gudang (pembuat pengajuan) tidak menampilkan tombol ini. --}}
                                     @if(strtolower(auth()->user()->role) === 'staff gudang')
                                         <button type="button"
                                             onclick="konfirmasiAksi('{{ route('transactions.konfirmasi', $item->id) }}', 'Setujui')"
-                                            class="px-3 py-2 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-semibold rounded-xl text-[11px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors">
-                                            Setujui
+                                            class="px-2 py-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-bold rounded-lg text-[10px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors cursor-pointer shadow-3xs">
+                                            Acc
                                         </button>
                                         <button type="button"
                                             onclick="konfirmasiAksi('{{ route('transactions.tolak', $item->id) }}', 'Tolak')"
-                                            class="px-3 py-2 text-red-700 bg-red-50 hover:bg-red-100/80 font-semibold rounded-xl text-[11px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors">
+                                            class="px-2 py-1.5 text-red-700 bg-red-50 hover:bg-red-100/80 font-bold rounded-lg text-[10px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors cursor-pointer shadow-3xs">
                                             Tolak
                                         </button>
                                     @else
-                                        <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Menunggu verifikasi Staff</span>
+                                        <span class="text-gray-400 dark:text-gray-500 italic text-[9px] leading-tight block">Wait Staff</span>
                                     @endif
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500 italic text-[11px]">Sudah diproses</span>
+                                    <span class="text-gray-400 dark:text-gray-500 text-[9px]">Done</span>
                                 @endif
                             </div>
                         </td>
                     </tr>
 
-                    {{-- 🆕 MODAL DETAIL TRANSAKSI: menampilkan keterangan/catatan lengkap tanpa terpotong --}}
+                    {{-- MODAL DETAIL TRANSAKSI --}}
                     <div id="detail-keluar-modal-{{ $item->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
                         <div class="relative w-full max-w-lg max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
                             <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4 mb-5">
@@ -240,9 +233,7 @@
                     </div>
                     @empty
                     <tr>
-                        <td colspan="9" class="px-6 py-12 text-center text-sm font-medium text-gray-400 dark:text-gray-500">
-                            Belum ada riwayat transaksi barang keluar.
-                        </td>
+                        <td colspan="9" class="px-6 py-12 text-center text-sm font-medium text-gray-400 dark:text-gray-500">Belum ada riwayat transaksi barang keluar.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -252,7 +243,6 @@
 </div>
 
 {{-- 5. MODAL TAMBAH BARANG KELUAR --}}
-{{-- Samakan dengan pengecekan tombol di atas -- hanya Manajer Gudang --}}
 @if(strtolower(auth()->user()->role) === 'manajer gudang')
 <div id="add-barang-keluar-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
     <div class="relative w-full max-w-md max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
@@ -269,7 +259,6 @@
                     <label for="product_id" class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Pilih Produk</label>
                     <select name="product_id" id="product_id" required class="w-full rounded-xl border-gray-200 text-xs dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 py-2.5">
                         <option value="" disabled selected>-- Pilih Produk di Gudang --</option>
-                        {{-- FIX: tampilkan stok AKTUAL ($prod->stock), bukan minimum_stock (ambang batas statis) --}}
                         @foreach($products as $prod)
                             <option value="{{ $prod->id }}">{{ $prod->name }} (Stok Saat Ini: {{ $prod->stock }})</option>
                         @endforeach
@@ -293,7 +282,7 @@
 </div>
 @endif
 
-{{-- 6. SCRIPT LIVE PENCARIAN --}}
+{{-- 6. SCRIPT LIVE PENCARIAN & KEBUTUHAN LAIN --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -324,19 +313,29 @@
         }
     });
 
-    {{-- 🆕 KONFIRMASI SETUJUI/TOLAK: pakai SweetAlert2, disamakan persis dengan halaman Barang Masuk --}}
+    function exportBarangKeluarToExcel() {
+        const table = document.getElementById("barangKeluarTable");
+        const blob = new Blob(['\ufeff' + table.outerHTML], { type: "application/vnd.ms-excel" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Laporan_Barang_Keluar_" + new Date().toISOString().slice(0,10) + ".xls";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
     function konfirmasiAksi(url, tipe) {
-        let buttonColorClass = tipe === 'Setujui'
-            ? 'bg-amber-500 hover:bg-amber-600 text-white'
-            : 'bg-red-500 hover:bg-red-600 text-white';
+        let buttonColorClass = tipe === 'Setujui' 
+            ? 'bg-emerald-500 text-white' 
+            : 'bg-red-500 text-white';
 
         const swalWithBootstrapButtons = Swal.mixin({
             customClass: {
                 popup: 'rounded-2xl shadow-xl',
                 title: 'text-lg font-bold',
-                confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors ${buttonColorClass}`,
-                cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors',
-                icon: tipe === 'Setujui' ? 'border-amber-500 text-amber-500' : 'border-red-500 text-red-500'
+                confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 transition-colors ${buttonColorClass} cursor-pointer`,
+                cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 cursor-pointer',
             },
             buttonsStyling: false
         });
@@ -344,18 +343,10 @@
         swalWithBootstrapButtons.fire({
             title: 'Konfirmasi',
             text: `Anda yakin ingin ${tipe} data ini?`,
-            icon: tipe === 'Setujui' ? 'question' : 'error',
-            width: '320px',
+            icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Lanjut',
-            cancelButtonText: 'Batal',
-            didOpen: (popup) => {
-                if (tipe === 'Setujui') {
-                    const icon = popup.querySelector('.swal2-question');
-                    if (icon) icon.style.color = '#f59e0b';
-                    if (icon) icon.style.borderColor = '#f59e0b';
-                }
-            }
+            cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
                 let form = document.createElement('form');
