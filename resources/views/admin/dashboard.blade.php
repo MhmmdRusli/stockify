@@ -15,6 +15,9 @@
         width: 1px;
         background-color: currentColor;
     }
+    .mini-bar-track {
+        background-color: rgba(156,163,175,0.15);
+    }
 </style>
 
 <div class="p-5 bg-white border-b border-gray-100 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700/60">
@@ -34,13 +37,32 @@
 {{-- 🛡️ 1. TAMPILAN DASHBOARD: ADMIN --}}
 {{-- ========================================================================= --}}
 @if(Auth::user()->role === 'Admin')
-{{-- Fallback aman: kalau controller belum mengirim $recentActivities, ambil di sini langsung --}}
 @php
     $recentActivities = $recentActivities ?? \App\Models\StockTransaction::with(['product', 'user'])->latest()->take(4)->get();
+
+    // 🆕 Data tambahan (fallback aman — pindahkan ke controller kalau mau lebih rapi)
+    $totalSuppliers = $totalSuppliers ?? \App\Models\Supplier::count();
+    $totalCategories = $totalCategories ?? \App\Models\Category::count();
+    $totalUsers = $totalUsers ?? \App\Models\User::count();
+    $pendingTransactions = $pendingTransactions ?? \App\Models\StockTransaction::where('status', 'Pending')->count();
+
+    $roleBreakdown = $roleBreakdown ?? \App\Models\User::selectRaw('role, count(*) as total')->groupBy('role')->pluck('total', 'role');
+    $maxRoleCount = $roleBreakdown->max() ?: 1;
+
+    $topProducts = $topProducts ?? \App\Models\StockTransaction::where('status', '!=', 'Pending')
+        ->select('product_id')
+        ->selectRaw('SUM(quantity) as total_qty')
+        ->whereDate('date', '>=', now()->subDays(7))
+        ->groupBy('product_id')
+        ->orderByDesc('total_qty')
+        ->with('product')
+        ->take(5)
+        ->get();
+    $maxTopQty = $topProducts->max('total_qty') ?: 1;
 @endphp
 
+{{-- BARIS 1: KARTU METRIK UTAMA --}}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
-    {{-- KARTU 1: TOTAL PRODUK --}}
     <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5">
         <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">RAK-01</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Total Jenis Produk</p>
@@ -55,7 +77,6 @@
         </div>
     </div>
 
-    {{-- KARTU 2: STOK MASUK --}}
     <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(20,184,166,0.35)">
         <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">MASUK</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Akumulasi Stok Masuk</p>
@@ -70,7 +91,6 @@
         </div>
     </div>
 
-    {{-- KARTU 3: STOK KELUAR --}}
     <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(244,63,94,0.35)">
         <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">KELUAR</span>
         <p class="rak-tag text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase mb-2">Akumulasi Stok Keluar</p>
@@ -86,8 +106,33 @@
     </div>
 </div>
 
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+    @php
+        $stats = [
+            ['title' => 'Supplier Mitra', 'value' => $totalSuppliers, 'color' => 'blue', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4M4 17h12m0 0l-4 4m4-4l-4-4'],
+            ['title' => 'Kategori Aktif', 'value' => $totalCategories, 'color' => 'purple', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
+            ['title' => 'Total Pengguna', 'value' => $totalUsers, 'color' => 'indigo', 'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-6.13a4 4 0 11-8 0 4 4 0 018 0zm6 3a4 4 0 10-8 0'],
+            ['title' => 'Transaksi Pending', 'value' => $pendingTransactions, 'color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z']
+        ];
+    @endphp
+
+    @foreach($stats as $stat)
+    <div class="group relative p-5 bg-white dark:bg-[#111826] rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex items-center gap-4">
+        <div class="p-3 rounded-xl bg-{{ $stat['color'] }}-50 text-{{ $stat['color'] }}-600 dark:bg-{{ $stat['color'] }}-950/30 dark:text-{{ $stat['color'] }}-400 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"></path>
+            </svg>
+        </div>
+        <div class="min-w-0">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $stat['title'] }}</p>
+            <p class="text-xl font-extrabold text-gray-900 dark:text-white leading-tight mt-0.5">{{ $stat['value'] }}</p>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+{{-- BARIS 3: CHART + AKTIVITAS TERBARU --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
-    {{-- DISPATCH BOARD (CHART) --}}
     <div class="lg:col-span-2 p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center justify-between mb-1">
             <div>
@@ -110,7 +155,6 @@
         </div>
     </div>
 
-    {{-- 🆕 AKTIVITAS PENGGUNA TERBARU (menggantikan Monitoring Batas Stok) --}}
     <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(99,102,241,0.35)">
         <span class="rak-tag absolute top-0 right-0 bg-indigo-50 text-indigo-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-indigo-950/30 dark:text-indigo-300">LOG-USER</span>
         <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Aktivitas Pengguna Terbaru</h3>
@@ -149,12 +193,77 @@
         </div>
     </div>
 </div>
+
+{{-- 🆕 BARIS 4: PRODUK PALING AKTIF + KOMPOSISI PENGGUNA --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+    <div class="lg:col-span-2 rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60" style="border-left-color: rgba(245,166,35,0.4)">
+        <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">TOP-MOVE</span>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Produk Paling Aktif Bergerak</h3>
+        <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Berdasarkan volume transaksi 7 hari terakhir</p>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+            @forelse($topProducts as $tp)
+            <div class="flex items-center gap-3 py-2.5 px-1">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs font-bold text-gray-800 dark:text-white truncate">{{ $tp->product->name ?? 'Produk Terhapus' }}</p>
+                        <span class="rak-tag text-xs font-bold text-amber-600 dark:text-amber-400 shrink-0 ml-2">{{ $tp->total_qty }} Pcs</span>
+                    </div>
+                    <div class="w-full mini-bar-track h-1.5 rounded-full overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: {{ min(($tp->total_qty / $maxTopQty) * 100, 100) }}%"></div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-6 text-center text-xs text-gray-400">Belum ada aktivitas transaksi minggu ini.</div>
+            @endforelse
+        </div>
+    </div>
+
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60" style="border-left-color: rgba(59,130,246,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-blue-50 text-blue-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-blue-950/30 dark:text-blue-300">USR-MIX</span>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Komposisi Pengguna</h3>
+        <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Sebaran akun berdasarkan peran</p>
+        <div class="space-y-3">
+            @forelse($roleBreakdown as $role => $count)
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $role }}</span>
+                    <span class="rak-tag text-xs font-bold text-gray-500 dark:text-gray-400">{{ $count }}</span>
+                </div>
+                <div class="w-full mini-bar-track h-1.5 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-400" style="width: {{ min(($count / $maxRoleCount) * 100, 100) }}%"></div>
+                </div>
+            </div>
+            @empty
+            <div class="p-6 text-center text-xs text-gray-400">Belum ada data pengguna.</div>
+            @endforelse
+        </div>
+    </div>
+</div>
 @endif
 
 {{-- ========================================================================= --}}
 {{-- 📦 2. TAMPILAN DASHBOARD: MANAJER GUDANG (Sesuai Spec: Stok Menipis, Masuk & Keluar Hari Ini) --}}
 {{-- ========================================================================= --}}
 @if(Auth::user()->role === 'Manajer Gudang')
+@php
+    // 🆕 Data tambahan (fallback aman)
+    $totalProdukManajer = $totalProdukManajer ?? \App\Models\Product::count();
+    $totalSupplierManajer = $totalSupplierManajer ?? \App\Models\Supplier::count();
+    $pendingStaffCount = $pendingStaffCount ?? \App\Models\StockTransaction::where('status', 'Pending')->count();
+
+    $topProductsManajer = $topProductsManajer ?? \App\Models\StockTransaction::where('status', '!=', 'Pending')
+        ->select('product_id')
+        ->selectRaw('SUM(quantity) as total_qty')
+        ->whereDate('date', '>=', now()->subDays(7))
+        ->groupBy('product_id')
+        ->orderByDesc('total_qty')
+        ->with('product')
+        ->take(5)
+        ->get();
+    $maxTopQtyManajer = $topProductsManajer->max('total_qty') ?: 1;
+@endphp
+
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-4">
     {{-- KARTU 1: STOK MENIPIS --}}
     <div class="rak-ticket group relative p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm hover:shadow-md border border-gray-100 dark:border-gray-700/60 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style="border-left-color: rgba(245,166,35,0.4)">
@@ -202,24 +311,75 @@
     </div>
 </div>
 
-{{-- DAFTAR PRODUK STOK MENIPIS (pelengkap kartu di atas) --}}
-<div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden mt-5" style="border-left-color: rgba(245,166,35,0.4)">
-    <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">MIN-STOK</span>
-    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Monitoring Batas Stok Terbaru</h3>
-    <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Produk mendekati batas minimum, perlu tindakan restock</p>
-    <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
-        @forelse($lowStockProducts as $product)
-        <div class="flex items-center gap-3 py-2.5 px-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors duration-150">
-            <span class="flex-shrink-0 w-1.5 h-8 rounded-full bg-orange-300"></span>
-            <div class="flex-1 min-w-0">
-                <p class="rak-tag text-xs font-bold text-gray-800 dark:text-white">{{ $product->sku ?? '-' }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[160px]">{{ $product->name }}</p>
-            </div>
-            <span class="rak-tag flex-shrink-0 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-bold px-2.5 py-1 rounded-full ring-1 ring-orange-100 dark:ring-orange-800">{{ $product->minimum_stock }} Pcs</span>
+{{-- 🆕 BARIS MINI: RINGKASAN TAMBAHAN (Gaya Konsisten) --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+    @php
+        $miniStats = [
+            ['title' => 'Total Produk', 'value' => $totalProdukManajer, 'color' => 'amber', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+            ['title' => 'Supplier Mitra', 'value' => $totalSupplierManajer, 'color' => 'blue', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4M4 17h12m0 0l-4 4m4-4l-4-4'],
+            ['title' => 'Menunggu Staff', 'value' => $pendingStaffCount, 'color' => 'rose', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z']
+        ];
+    @endphp
+
+    @foreach($miniStats as $stat)
+    <div class="group relative p-5 bg-white dark:bg-[#111826] rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex items-center gap-4">
+        <div class="p-3 rounded-xl bg-{{ $stat['color'] }}-50 text-{{ $stat['color'] }}-600 dark:bg-{{ $stat['color'] }}-950/30 dark:text-{{ $stat['color'] }}-400 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"></path>
+            </svg>
         </div>
-        @empty
-        <div class="p-6 text-center text-xs text-gray-400">Stok gudang aman terkendali.</div>
-        @endforelse
+        <div class="min-w-0">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $stat['title'] }}</p>
+            <p class="text-xl font-extrabold text-gray-900 dark:text-white leading-tight mt-0.5">{{ $stat['value'] }}</p>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+{{-- BARIS: MONITORING STOK + PRODUK PALING AKTIF --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(245,166,35,0.4)">
+        <span class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">MIN-STOK</span>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Monitoring Batas Stok Terbaru</h3>
+        <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Produk mendekati batas minimum, perlu tindakan restock</p>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+            @forelse($lowStockProducts as $product)
+            <div class="flex items-center gap-3 py-2.5 px-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors duration-150">
+                <span class="flex-shrink-0 w-1.5 h-8 rounded-full bg-orange-300"></span>
+                <div class="flex-1 min-w-0">
+                    <p class="rak-tag text-xs font-bold text-gray-800 dark:text-white">{{ $product->sku ?? '-' }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[160px]">{{ $product->name }}</p>
+                </div>
+                <span class="rak-tag flex-shrink-0 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-bold px-2.5 py-1 rounded-full ring-1 ring-orange-100 dark:ring-orange-800">{{ $product->minimum_stock }} Pcs</span>
+            </div>
+            @empty
+            <div class="p-6 text-center text-xs text-gray-400">Stok gudang aman terkendali.</div>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- 🆕 PRODUK PALING AKTIF --}}
+    <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 relative overflow-hidden" style="border-left-color: rgba(20,184,166,0.35)">
+        <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">TOP-MOVE</span>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Produk Paling Aktif Bergerak</h3>
+        <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Volume transaksi 7 hari terakhir</p>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+            @forelse($topProductsManajer as $tp)
+            <div class="flex items-center gap-3 py-2.5 px-1">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs font-bold text-gray-800 dark:text-white truncate">{{ $tp->product->name ?? 'Produk Terhapus' }}</p>
+                        <span class="rak-tag text-xs font-bold text-teal-600 dark:text-teal-400 shrink-0 ml-2">{{ $tp->total_qty }} Pcs</span>
+                    </div>
+                    <div class="w-full mini-bar-track h-1.5 rounded-full overflow-hidden">
+                        <div class="h-full bg-teal-400" style="width: {{ min(($tp->total_qty / $maxTopQtyManajer) * 100, 100) }}%"></div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-6 text-center text-xs text-gray-400">Belum ada aktivitas transaksi minggu ini.</div>
+            @endforelse
+        </div>
     </div>
 </div>
 @endif
@@ -228,12 +388,43 @@
 {{-- ⚡ 3. TAMPILAN DASHBOARD: STAFF GUDANG --}}
 {{-- ========================================================================= --}}
 @if(Auth::user()->role === 'Staff Gudang')
-{{-- 🚚 TUGAS RESTOCK DARI MANAJER (tampil di dashboard Staff Gudang) --}}
 @php
     $restockTasks = Auth::user()->unreadNotifications
         ->where('data.type', 'restock_task');
+
+    // 🆕 Ringkasan tugas selesai hari ini (fallback aman)
+    $selesaiHariIni = $selesaiHariIni ?? \App\Models\StockTransaction::where('approved_by', Auth::id())
+        ->whereDate('updated_at', now()->toDateString())
+        ->count();
+    $totalPendingGabungan = ($tugasMasuk->count() ?? 0) + ($tugasKeluar->count() ?? 0);
 @endphp
 
+{{-- 🆕 RINGKASAN MINI STAFF (Gaya Konsisten) --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+    @php
+        $staffStats = [
+            ['title' => 'Tugas Selesai Hari Ini', 'value' => $selesaiHariIni, 'color' => 'emerald', 'icon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['title' => 'Total Tugas Pending', 'value' => $totalPendingGabungan, 'color' => 'amber', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['title' => 'Notifikasi Restock Baru', 'value' => $restockTasks->count(), 'color' => 'rose', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9']
+        ];
+    @endphp
+
+    @foreach($staffStats as $stat)
+    <div class="group relative p-5 bg-white dark:bg-[#111826] rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 flex items-center gap-4">
+        <div class="p-3 rounded-xl bg-{{ $stat['color'] }}-50 text-{{ $stat['color'] }}-600 dark:bg-{{ $stat['color'] }}-950/30 dark:text-{{ $stat['color'] }}-400 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"></path>
+            </svg>
+        </div>
+        <div class="min-w-0">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $stat['title'] }}</p>
+            <p class="text-xl font-extrabold text-gray-900 dark:text-white leading-tight mt-0.5">{{ $stat['value'] }}</p>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+{{-- 🚚 TUGAS RESTOCK DARI MANAJER --}}
 @if($restockTasks->count() > 0)
 <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 relative overflow-hidden mt-4" style="border-left-color: rgba(244,63,94,0.35)">
     <span class="rak-tag absolute top-0 right-0 bg-rose-50 text-rose-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-rose-950/30 dark:text-rose-300">TASK-RESTOCK</span>
@@ -262,6 +453,7 @@
     </div>
 </div>
 @endif
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
     <div class="rak-ticket p-5 bg-white dark:bg-[#111826] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/60 transition-shadow hover:shadow-md relative overflow-hidden" style="border-left-color: rgba(20,184,166,0.35)">
         <span class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">TASK-IN</span>

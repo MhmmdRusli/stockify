@@ -19,7 +19,7 @@
                 <span class="material-symbols-outlined text-sm">download_for_offline</span>
                 Unduh Excel
             </button>
-            <button onclick="window.print()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
+            <button onclick="window.print()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-slate-700 hover:bg-slate-800 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
                 <span class="material-symbols-outlined text-sm">print</span>
                 Cetak PDF
             </button>
