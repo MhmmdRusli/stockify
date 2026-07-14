@@ -87,22 +87,21 @@
     </div>
 
     {{-- 4. KONTEN TABEL DATA TRANSAKSI --}}
+    {{-- 🆕 FIX: overflow-x-auto dihapus dari wrapper, tabel dipaksa table-fixed w-full agar tidak perlu scroll horizontal --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs overflow-hidden">
-        {{-- overflow-x-auto dihapus agar tabel dipaksa masuk layar penuh tanpa scroll horizontal --}}
         <div class="w-full">
-            <table id="barangMasukTable" class="w-full divide-y divide-gray-100 dark:divide-gray-700 text-left table-fixed">
+            <table id="barangMasukTable" class="w-full table-fixed divide-y divide-gray-100 dark:divide-gray-700 text-left">
                 <thead class="bg-gray-50/75 dark:bg-gray-700/50 text-gray-400 dark:text-gray-400 font-bold uppercase text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700">
                     <tr>
-                        <th class="px-3 py-4 w-[12%]">Waktu</th>
-                        <th class="px-3 py-4 w-[11%]">ID Transaksi</th>
-                        <th class="px-3 py-4 w-[15%]">Nama Produk</th>
-                        <th class="px-3 py-4 w-[10%]">SKU</th>
-                        <th class="px-2 py-4 w-[9%] text-center">Tipe</th>
+                        <th class="px-3 py-4 w-[11%]">Waktu</th>
+                        <th class="px-3 py-4 w-[10%]">ID Transaksi</th>
+                        <th class="px-3 py-4 w-[16%]">Nama Produk</th>
+                        <th class="px-3 py-4 w-[9%]">SKU</th>
+                        <th class="px-2 py-4 w-[8%] text-center">Tipe</th>
                         <th class="px-2 py-4 w-[7%] text-right">Jumlah</th>
-                        <th class="px-3 py-4 w-[16%]">Keterangan</th>
-                        <th class="px-2 py-4 w-[10%] text-center">Status</th>
-                        {{-- Lebar kolom aksi disesuaikan agar tombol muat berdampingan --}}
-                        <th class="px-3 py-4 w-[10%] text-center">Aksi SOP</th>
+                        <th class="px-3 py-4 w-[15%]">Keterangan</th>
+                        <th class="px-2 py-4 w-[9%] text-center">Status</th>
+                        <th class="px-2 py-4 w-[15%] text-center">Aksi SOP</th>
                     </tr>
                 </thead>
                 <tbody id="transaction-table" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -147,27 +146,26 @@
                                 </span>
                             @endif
                         </td>
-                        {{-- Kolom Aksi SOP: Flexbox diganti inline-flex agar tetap satu baris rapi dan tidak melar --}}
-                        <td class="px-3 py-4 text-center">
-                            <div class="inline-flex items-center justify-center gap-1">
-                                <button type="button" data-modal-target="detail-masuk-modal-{{ $item->id }}" data-modal-toggle="detail-masuk-modal-{{ $item->id }}" class="p-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50 cursor-pointer shadow-3xs" title="Lihat Detail">
+                        <td class="px-2 py-4 text-center">
+                            <div class="inline-flex items-center justify-center gap-1 flex-wrap">
+                                <button type="button" data-modal-target="detail-masuk-modal-{{ $item->id }}" data-modal-toggle="detail-masuk-modal-{{ $item->id }}" class="p-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/50" title="Lihat Detail">
                                     <span class="material-symbols-outlined text-base">visibility</span>
                                 </button>
-        
+
                                 @if($item->status === 'Pending')
                                     @if(strtolower(auth()->user()->role) === 'manajer gudang')
-                                        <button type="button" 
-                                            onclick="konfirmasiAksi('{{ route('transactions.konfirmasi', $item->id) }}', 'Setujui')" 
-                                            class="px-2 py-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-bold rounded-lg text-[10px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors cursor-pointer shadow-3xs">
+                                        <button type="button"
+                                            onclick="konfirmasiAksi('{{ route('transactions.konfirmasi', $item->id) }}', 'Setujui')"
+                                            class="px-2 py-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 font-bold rounded-lg text-[10px] border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors">
                                             Acc
                                         </button>
-                                        <button type="button" 
-                                            onclick="konfirmasiAksi('{{ route('transactions.tolak', $item->id) }}', 'Tolak')" 
-                                            class="px-2 py-1.5 text-red-700 bg-red-50 hover:bg-red-100/80 font-bold rounded-lg text-[10px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors cursor-pointer shadow-3xs">
+                                        <button type="button"
+                                            onclick="konfirmasiAksi('{{ route('transactions.tolak', $item->id) }}', 'Tolak')"
+                                            class="px-2 py-1.5 text-red-700 bg-red-50 hover:bg-red-100/80 font-bold rounded-lg text-[10px] border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50 transition-colors">
                                             Tolak
                                         </button>
                                     @else
-                                        <span class="text-gray-400 dark:text-gray-500 italic text-[9px] leading-tight block">Wait Mgr</span>
+                                        <span class="text-gray-400 dark:text-gray-500 italic text-[9px] leading-tight">Wait Mgr</span>
                                     @endif
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500 text-[9px]">Done</span>
@@ -175,7 +173,7 @@
                             </div>
                         </td>
                     </tr>
-                    
+
                     {{-- Modal Detail --}}
                     <div id="detail-masuk-modal-{{ $item->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto h-[calc(100%-1rem)] max-h-full bg-gray-900/40 backdrop-blur-xs flex items-center justify-center">
                         <div class="relative w-full max-w-lg max-h-full bg-white rounded-2xl shadow-xl dark:bg-gray-800 p-6 border border-gray-100 dark:border-gray-700 mx-auto mt-10">
@@ -294,13 +292,12 @@
 <script>
 let isQuickProductActive = false;
 
-// Real-time local search filter script
 document.getElementById('table-search')?.addEventListener('input', function() {
     const query = this.value.toLowerCase().trim();
     const rows = document.querySelectorAll('#transaction-table tr');
-    
+
     rows.forEach(row => {
-        if(row.cells.length > 1) { 
+        if(row.cells.length > 1) {
             const textContent = row.textContent.toLowerCase();
             if(textContent.includes(query)) {
                 row.classList.remove('hidden');
@@ -422,8 +419,8 @@ function konfirmasiAksi(url, tipe) {
         customClass: {
             popup: 'rounded-2xl shadow-xl',
             title: 'text-lg font-bold',
-            confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 ${buttonColorClass} cursor-pointer`,
-            cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700 cursor-pointer'
+            confirmButton: `px-5 py-2 text-xs font-bold rounded-lg mr-3 ${buttonColorClass}`,
+            cancelButton: 'px-5 py-2 text-xs font-bold rounded-lg bg-gray-200 text-gray-700'
         },
         buttonsStyling: false 
     });
