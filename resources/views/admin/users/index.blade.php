@@ -118,19 +118,26 @@
                             </span>
                         </td>
                         {{-- Kolom Tombol Aksi --}}
-                        <td class="px-6 py-5 whitespace-nowrap text-right pr-8 space-x-1">
-                            <button type="button" data-modal-target="editUserModal-{{ $user->id }}" data-modal-toggle="editUserModal-{{ $user->id }}" class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50">
-                                <span class="material-symbols-outlined text-sm">edit</span>
-                            </button>
-                            {{-- 🆕 Form hapus tersembunyi + tombol trigger SweetAlert2, sama pola dengan halaman Produk --}}
-                            <form id="delete-user-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" onclick="konfirmasiHapusUser('{{ $user->id }}')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
-                                    <span class="material-symbols-outlined text-sm">delete</span>
-                                </button>
-                            </form>
-                        </td>
+<td class="px-6 py-5 whitespace-nowrap text-right pr-8 space-x-1">
+    {{-- Tombol Edit: Hanya tampil jika bukan Admin, atau jika itu adalah akun diri sendiri --}}
+    @if($user->role !== 'Admin' || $user->id === auth()->id())
+        <button type="button" data-modal-target="editUserModal-{{ $user->id }}" data-modal-toggle="editUserModal-{{ $user->id }}" class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/50">
+            <span class="material-symbols-outlined text-sm">edit</span>
+        </button>
+
+        {{-- Tombol Hapus: Hanya tampil jika bukan Admin, atau jika itu adalah akun diri sendiri --}}
+        <form id="delete-user-form-{{ $user->id }}" action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="button" onclick="konfirmasiHapusUser('{{ $user->id }}')" class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100/80 rounded-xl transition-colors inline-flex items-center justify-center border border-red-100 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/50">
+                <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+        </form>
+    @else
+        {{-- Pesan jika akses terbatas --}}
+        <span class="text-[10px] text-gray-300 dark:text-gray-600 italic">Akses Terbatas</span>
+    @endif
+</td>
                     </tr>
 
                     {{-- 5. MODAL EDIT USER --}}
