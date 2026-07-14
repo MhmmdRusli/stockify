@@ -15,13 +15,14 @@
         
         {{-- DI ATAS: Tombol Cetak & Excel --}}
         <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <button onclick="exportAuditToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
+                <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
+            </button>
+            
             <a href="{{ route('report.user_activity.print') }}" target="_blank"
                class="px-4 py-2.5 bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
                 <span class="material-symbols-outlined text-sm">print</span> CETAK PDF
             </a>
-            <button onclick="exportAuditToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition">
-                <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
-            </button>
         </div>
     </div>
 

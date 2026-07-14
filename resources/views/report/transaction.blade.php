@@ -4,7 +4,7 @@
 <div class="p-6 space-y-6 bg-gray-50/50 dark:bg-gray-950 min-h-screen id-to-print">
 
     {{-- 1. HEADER HALAMAN --}}
-    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 print:border-none print:shadow-none print:p-0">
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:border-none print:shadow-none print:p-0">
         <div class="text-left">
             <h1 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 print:text-black">
                 <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl print:hidden">swap_horizontal_circle</span>
@@ -13,15 +13,13 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Sistem rekam log mutasi, penyesuaian kuantitas stok, dan status validasi SOP gudang.</p>
         </div>
         
-        {{-- POSISINYA DI SINI: Tombol Aksi & Informasi Zona Waktu --}}
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-            <button onclick="exportToExcel()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
-                <span class="material-symbols-outlined text-sm">download_for_offline</span>
-                Unduh Excel
+        {{-- TOMBOL AKSI: Posisi ditukar, ikon bawaan tetap dipertahankan, font diselaraskan --}}
+        <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+            <button onclick="exportToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition print:hidden">
+                <span class="material-symbols-outlined text-sm">download_for_offline</span> UNDUH EXCEL
             </button>
-            <button onclick="window.print()" class="flex-1 lg:flex-none inline-flex items-center justify-center gap-2 text-white bg-slate-700 hover:bg-slate-800 font-semibold rounded-xl text-sm px-4 py-2.5 shadow-xs transition-colors cursor-pointer print:hidden">
-                <span class="material-symbols-outlined text-sm">print</span>
-                Cetak PDF
+            <button onclick="window.print()" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition print:hidden">
+                <span class="material-symbols-outlined text-sm">print</span> CETAK PDF
             </button>
         </div>
     </div>
