@@ -37,6 +37,16 @@ class DashboardController extends Controller
         }
 
         // ==========================================
+        // 🚨 DATA GLOBAL: UNTUK MONITORING BATAS STOK TERBARU
+        // ==========================================
+        // Logika yang bener: Ambil produk yang stoknya saat ini LEBIH KECIL ATAU SAMA DENGAN batas minimum stoknya
+        $lowStockProducts = Product::whereColumn('stock', '<=', 'minimum_stock')
+            ->latest()
+            ->take(5)
+            ->get();
+
+
+        // ==========================================
         // 🛡️ KONDISI PEMBAGIAN DATA BERDASARKAN ROLE
         // ==========================================
 
@@ -45,7 +55,6 @@ class DashboardController extends Controller
             $totalProducts = Product::count();
             $totalFormatIn = StockTransaction::where('type', 'in')->sum('quantity');
             $totalFormatOut = StockTransaction::where('type', 'out')->sum('quantity');
-            $lowStockProducts = Product::where('minimum_stock', '<', 10)->latest()->take(5)->get();
 
             $recentUsers = User::latest()->take(5)->get();
 
@@ -55,11 +64,8 @@ class DashboardController extends Controller
             ));
         }
 
-        // 2. DATA KHUSUS MANAJER GUDANG (Sesuai Spec: Stok Menipis, Masuk & Keluar Hari Ini)
+        // 2. DATA KHUSUS MANAJER GUDANG
         elseif ($role === 'Manajer Gudang') {
-            // Daftar & jumlah produk yang stoknya menipis (di bawah batas minimum)
-            $lowStockProducts = Product::where('minimum_stock', '<', 10)->latest()->get();
-
             // Statistik transaksi hari ini
             $masukHariIni = StockTransaction::where('type', 'in')->whereDate('date', now()->toDateString())->sum('quantity');
             $keluarHariIni = StockTransaction::where('type', 'out')->whereDate('date', now()->toDateString())->sum('quantity');
@@ -69,12 +75,17 @@ class DashboardController extends Controller
             ));
         }
 
-        // 3. DATA KHUSUS STAFF GUDANG (Daftar tugas konfirmasi barang masuk/keluar)
+        // 3. DATA KHUSUS STAFF GUDANG
         else {
             $tugasMasuk = StockTransaction::where('type', 'in')->where('status', 'Pending')->with('product')->get();
             $tugasKeluar = StockTransaction::where('type', 'out')->where('status', 'Pending')->with('product')->get();
 
-            return view('admin.dashboard', compact('tugasMasuk', 'tugasKeluar'));
+            // SelesaiHariIni fallback buat ringkasan mini staff gudang
+            $selesaiHariIni = StockTransaction::where('approved_by', Auth::id())
+                ->whereDate('updated_at', now()->toDateString())
+                ->count();
+
+            return view('admin.dashboard', compact('tugasMasuk', 'tugasKeluar', 'lowStockProducts', 'selesaiHariIni'));
         }
     }
 

@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\StockOpname;
 use App\Models\Product;
-use App\Models\StockTransaction; // Tambahkan model ini di atas
+use App\Models\StockTransaction;
 use Illuminate\Support\Facades\Auth;
 
 class StockOpnameRepository
@@ -19,30 +19,33 @@ class StockOpnameRepository
         return StockOpname::create($data);
     }
 
-    // UBAH FUNGSI INI: Sekarang mencatat mutasi ke tabel StockTransaction
     public function updateProductStock($productId, $newStock, $difference)
     {
-        // Jika tidak ada selisih, tidak perlu mencatat transaksi mutasi stok
+        // 1. UPDATE STOK DI TABEL PRODUCTS (Agar angka di sistem berubah)
+        $product = Product::find($productId);
+        if ($product) {
+            $product->update([
+                'stock' => $newStock 
+            ]);
+        }
+
+        // 2. Jika tidak ada selisih, tidak perlu mencatat mutasi
         if ($difference == 0) {
             return null;
         }
 
-        // Tentukan jenis tipe transaksi berdasarkan nilai selisih
+        // 3. Tentukan tipe transaksi untuk log
         $type = $difference > 0 ? 'in' : 'out';
 
-        // Catat mutasi stok baru
-        // Cari bagian ini di dalam fungsi updateProductStock milik StockOpnameRepository:
-return StockTransaction::create([
-    'product_id' => $productId,
-    'user_id'    => Auth::id(),
-    'type'       => $type,
-    'quantity'   => abs($difference),
-    'date'       => now(),
-    
-    // SESUAIKAN BARIS INI:
-    'status'     => $type === 'in' ? 'Diterima' : 'Dikeluarkan', 
-    
-    'notes'      => 'Penyesuaian otomatis dari Stock Opname'
-]);
+        // 4. Catat mutasi ke tabel StockTransaction
+        return StockTransaction::create([
+            'product_id' => $productId,
+            'user_id'    => Auth::id(),
+            'type'       => $type,
+            'quantity'   => abs($difference),
+            'date'       => now(),
+            'status'     => $type === 'in' ? 'Diterima' : 'Dikeluarkan',
+            'notes'      => 'Penyesuaian otomatis dari Stock Opname'
+        ]);
     }
 }
