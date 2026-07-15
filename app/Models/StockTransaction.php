@@ -19,7 +19,8 @@ class StockTransaction extends Model
         'date', 
         'status', 
         'notes',
-        'approved_by', // 🆕 WAJIB ditambahkan, tanpa ini update() akan diabaikan diam-diam
+        'approved_by',
+        'is_new_product' // 🆕 WAJIB ditambahkan, tanpa ini update() akan diabaikan diam-diam
     ];
 
     public function product()

@@ -122,7 +122,7 @@ Route::name('practice.')->prefix('practice')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/report/user-activity', [UserActivityController::class, 'index'])
-        ->name('report.user_activity.index');
+        ->name('report.user_activity');
 
     Route::get('/report/user-activity/print', [UserActivityController::class, 'print'])
         ->name('report.user_activity.print');

@@ -70,14 +70,31 @@ class DashboardController extends Controller
             $masukHariIni = StockTransaction::where('type', 'in')->whereDate('date', now()->toDateString())->sum('quantity');
             $keluarHariIni = StockTransaction::where('type', 'out')->whereDate('date', now()->toDateString())->sum('quantity');
 
+            // 🆕 Draft produk baru dari Staff yang menunggu verifikasi Manajer
+            $draftDariStaff = StockTransaction::where('type', 'in')
+                ->where('status', 'Pending')
+                ->whereHas('user', function ($q) {
+                    $q->where('role', 'Staff Gudang');
+                })
+                ->with('product')
+                ->get();
+
             return view('admin.dashboard', compact(
-                'lowStockProducts', 'masukHariIni', 'keluarHariIni'
+                'lowStockProducts', 'masukHariIni', 'keluarHariIni', 'draftDariStaff'
             ));
         }
 
         // 3. DATA KHUSUS STAFF GUDANG
         else {
-            $tugasMasuk = StockTransaction::where('type', 'in')->where('status', 'Pending')->with('product')->get();
+            // 🆕 FIX: hanya ambil transaksi yang DIBUAT OLEH MANAJER (butuh aksi Staff)
+            $tugasMasuk = StockTransaction::where('type', 'in')
+                ->where('status', 'Pending')
+                ->whereHas('user', function ($q) {
+                    $q->where('role', 'Manajer Gudang');
+                })
+                ->with('product')
+                ->get();
+
             $tugasKeluar = StockTransaction::where('type', 'out')->where('status', 'Pending')->with('product')->get();
 
             // SelesaiHariIni fallback buat ringkasan mini staff gudang

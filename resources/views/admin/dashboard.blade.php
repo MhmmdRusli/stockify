@@ -472,11 +472,14 @@
                 style="border-left-color: rgba(245,166,35,0.4)">
                 <span
                     class="rak-tag absolute top-0 right-0 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-amber-950/30 dark:text-amber-300">MIN-STOK</span>
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Monitoring Batas Stok Terbaru</h3>
-                <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Produk mendekati batas minimum, perlu tindakan restock</p>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Monitoring Batas Stok
+                    Terbaru</h3>
+                <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Produk mendekati batas minimum, perlu
+                    tindakan restock</p>
                 <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
                     @forelse($lowStockProducts as $product)
-                        <div class="flex items-center justify-between gap-3 py-2.5 px-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors duration-150">
+                        <div
+                            class="flex items-center justify-between gap-3 py-2.5 px-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors duration-150">
                             <div class="flex items-center gap-3 min-w-0">
                                 <span class="flex-shrink-0 w-1.5 h-8 rounded-full bg-orange-400"></span>
                                 <div class="min-w-0">
@@ -490,10 +493,12 @@
                             </div>
                             {{-- 🎯 FIX DI SINI: Nampilin Sisa Stok Asli vs Batas Minimalnya --}}
                             <div class="text-right shrink-0">
-                                <span class="rak-tag bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 text-xs font-extrabold px-2.5 py-1 rounded-full ring-1 ring-rose-100 dark:ring-rose-900/40">
+                                <span
+                                    class="rak-tag bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400 text-xs font-extrabold px-2.5 py-1 rounded-full ring-1 ring-rose-100 dark:ring-rose-900/40">
                                     Sisa: {{ $product->stock }} Pcs
                                 </span>
-                                <p class="text-[9px] text-gray-400 dark:text-gray-500 mt-1 font-semibold">Min: {{ $product->minimum_stock }} Pcs</p>
+                                <p class="text-[9px] text-gray-400 dark:text-gray-500 mt-1 font-semibold">Min:
+                                    {{ $product->minimum_stock }} Pcs</p>
                             </div>
                         </div>
                     @empty
@@ -507,7 +512,8 @@
                 style="border-left-color: rgba(20,184,166,0.35)">
                 <span
                     class="rak-tag absolute top-0 right-0 bg-teal-50 text-teal-700 text-[10px] font-semibold px-2.5 py-1 rounded-bl-lg dark:bg-teal-950/30 dark:text-teal-300">TOP-MOVE</span>
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Produk Paling Aktif Bergerak</h3>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Produk Paling Aktif
+                    Bergerak</h3>
                 <p class="rak-tag text-[10px] text-gray-400 dark:text-gray-500 mb-3">Volume transaksi 7 hari terakhir</p>
                 <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
                     @forelse($topProductsManajer as $tp)
@@ -533,7 +539,7 @@
             </div>
         </div>
     @endif
-    
+
     {{-- ========================================================================= --}}
     {{-- ⚡ 3. TAMPILAN DASHBOARD: STAFF GUDANG --}}
     {{-- ========================================================================= --}}
@@ -661,7 +667,7 @@
                                     <td class="py-2.5 px-3 text-center font-bold text-emerald-600">{{ $tr->quantity }} Pcs
                                     </td>
                                     <td class="py-2.5 px-3 text-center rounded-r-lg">
-                                        @if ($tr->user_id !== auth()->id())
+                                        @if (!$tr->is_new_product)
                                             <div class="flex items-center justify-center gap-1.5">
                                                 <form action="{{ route('transactions.konfirmasi', $tr->id) }}"
                                                     method="POST" class="inline">
@@ -677,7 +683,7 @@
                                                 </form>
                                             </div>
                                         @else
-                                            <span class="text-[11px] text-gray-400 italic">Draf milik Anda sendiri</span>
+                                            <span class="text-[11px] text-gray-400 italic">Menunggu Acc Manajer</span>
                                         @endif
                                     </td>
                                 </tr>

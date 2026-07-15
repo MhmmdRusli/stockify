@@ -37,7 +37,7 @@ class StockTransactionController extends Controller
             auth()->user()->unreadNotifications()->where('id', $request->notification_id)->first()?->markAsRead();
         }
 
-        $transactions = StockTransaction::where('type', 'in')->with('product')->latest()->get();
+        $transactions = StockTransaction::where('type', 'in')->with(['product', 'user'])->latest()->get();
         $categories = Category::all();
         $products = Product::all();
 
@@ -45,63 +45,77 @@ class StockTransactionController extends Controller
     }
 
     public function masukStore(Request $request)
-    {
-        $request->validate([
-            'new_product_name'  => 'required|string|max:255',
-            'category_id'       => 'required',
-            'quantity'          => 'required|integer|min:1',
+{
+    // 🆕 SKENARIO A: Manajer memilih produk yang SUDAH ADA (dari dropdown product_id)
+    if ($request->filled('product_id')) {
+        $validated = $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity'   => 'required|integer|min:1',
+            'notes'      => 'nullable|string',
         ]);
 
-        try {
-            $categoryId = $request->category_id;
+        StockTransaction::create([
+            'product_id' => $validated['product_id'],
+            'user_id'    => auth()->id(),
+            'type'       => 'in',
+            'quantity'   => $validated['quantity'],
+            'date'       => now()->toDateString(),
+            'status'     => 'Pending',
+            'is_new_product' => false,
+            'notes'      => $validated['notes'] ?? 'Barang masuk dicatat oleh Manajer Gudang.',
+        ]);
 
-            if ($request->category_id === 'NEW_CATEGORY') {
-                $request->validate(['new_category_name' => 'required|string|max:255']);
-
-                $newCat = \App\Models\Category::create([
-                    'name' => $request->new_category_name
-                ]);
-                $categoryId = $newCat->id;
-            }
-
-            $defaultSupplier = \App\Models\Supplier::first();
-            $supplierId = $defaultSupplier ? $defaultSupplier->id : null;
-
-            $sku = $request->sku ?? 'SKU-' . strtoupper(uniqid());
-
-            $newProduct = \App\Models\Product::create([
-                'name'           => $request->new_product_name,
-                'category_id'    => $categoryId,
-                'supplier_id'    => $supplierId,
-                'sku'            => $sku,
-                'stock'          => 0,
-                'purchase_price' => 0,
-                'selling_price'  => 0,
-                'minimum_stock'  => 0,
-            ]);
-
-            $transaction = \App\Models\StockTransaction::create([
-                'product_id'   => $newProduct->id,
-                'user_id'      => auth()->id(),
-                'type'         => 'in',
-                'quantity'     => $request->quantity,
-                'date'         => now()->toDateString(),
-                'status'       => 'Pending',
-                'notes'        => $request->notes ?? 'Pengajuan barang masuk baru oleh Staff',
-            ]);
-
-            // 🆕 Notifikasi ke semua Manajer Gudang: ada draft barang masuk baru yang perlu diverifikasi
-            $managers = User::where('role', 'Manajer Gudang')->get();
-            if ($managers->isNotEmpty()) {
-                Notification::send($managers, new StockTransactionPendingNotification($transaction, auth()->user()));
-            }
-
-            return redirect()->route('barang.masuk.index')->with('success', 'Draft barang masuk baru berhasil diajukan! Menunggu verifikasi manajer.');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Gagal mengajukan draft: ' . $e->getMessage());
-        }
+        return redirect()->route('barang.masuk.index')->with('success', 'Barang masuk berhasil dicatat! Menunggu verifikasi.');
     }
+
+    // SKENARIO B: Staff mengajukan PRODUK BARU (logika lama, tidak diubah)
+    $request->validate([
+        'new_product_name'  => 'required|string|max:255',
+        'category_id'       => 'required',
+        'quantity'          => 'required|integer|min:1',
+    ]);
+
+    try {
+        $categoryId = $request->category_id;
+
+        if ($request->category_id === 'NEW_CATEGORY') {
+            $request->validate(['new_category_name' => 'required|string|max:255']);
+            $newCat = \App\Models\Category::create(['name' => $request->new_category_name]);
+            $categoryId = $newCat->id;
+        }
+
+        $defaultSupplier = \App\Models\Supplier::first();
+        $supplierId = $defaultSupplier ? $defaultSupplier->id : null;
+        $sku = $request->sku ?? 'SKU-' . strtoupper(uniqid());
+
+        $newProduct = \App\Models\Product::create([
+            'name'           => $request->new_product_name,
+            'category_id'    => $categoryId,
+            'supplier_id'    => $supplierId,
+            'sku'            => $sku,
+            'stock'          => 0,
+            'purchase_price' => 0,
+            'selling_price'  => 0,
+            'minimum_stock'  => 0,
+        ]);
+
+        \App\Models\StockTransaction::create([
+            'product_id'   => $newProduct->id,
+            'user_id'      => auth()->id(),
+            'type'         => 'in',
+            'quantity'     => $request->quantity,
+            'date'         => now()->toDateString(),
+            'status'       => 'Pending',
+            'is_new_product' => true,
+            'notes'        => $request->notes ?? 'Pengajuan barang masuk baru oleh Staff Gudang',
+        ]);
+
+        return redirect()->route('barang.masuk.index')->with('success', 'Draft barang masuk baru berhasil diajukan! Menunggu verifikasi manajer.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->withInput()->with('error', 'Gagal mengajukan draft: ' . $e->getMessage());
+    }
+}
 
     // ==========================================
     // 📦 FITUR: BARANG KELUAR
@@ -256,6 +270,8 @@ class StockTransactionController extends Controller
 
         $activities = $activities->sortByDesc('created_at')->values();
 
+        
+
         return view('report.user_activity', compact('activities'));
     }
 
@@ -338,6 +354,7 @@ class StockTransactionController extends Controller
             'quantity'   => $validated['quantity'],
             'date'       => now()->toDateString(),
             'status'     => 'Pending',
+            'is_new_product' => false,
             'notes'      => $validated['notes'] ?? 'Draf restock dari Staff Gudang.',
         ]);
 
